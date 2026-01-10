@@ -6,32 +6,39 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useWizardStore } from '@/stores/wizardStore';
 import { toast } from 'sonner';
+import { validateEnergyData } from '@/lib/validationSchemas';
+
+// Field configuration with max limits for display
+const FIELD_CONFIG = {
+  electricity: { label: 'Electricity', unit: 'kWh', icon: Zap, color: 'text-amber-500', max: 1000000 },
+  gas: { label: 'Natural Gas', unit: 'm³', icon: Flame, color: 'text-orange-500', max: 100000 },
+  fuel: { label: 'Fuel', unit: 'L', icon: Droplets, color: 'text-blue-500', max: 50000 },
+  waste: { label: 'Waste', unit: 'kg', icon: Trash2, color: 'text-slate-500', max: 10000 },
+} as const;
+
+type FieldKey = keyof typeof FIELD_CONFIG;
 
 const EnergyDataForm = () => {
   const { manualData, setManualData, nextStep } = useWizardStore();
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const fields = [
-    { key: 'electricity', label: 'Electricity', unit: 'kWh', icon: Zap, color: 'text-amber-500' },
-    { key: 'gas', label: 'Natural Gas', unit: 'm³', icon: Flame, color: 'text-orange-500' },
-    { key: 'fuel', label: 'Fuel', unit: 'L', icon: Droplets, color: 'text-blue-500' },
-    { key: 'waste', label: 'Waste', unit: 'kg', icon: Trash2, color: 'text-slate-500' },
-  ];
+  const fields: FieldKey[] = ['electricity', 'gas', 'fuel', 'waste'];
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-    let isValid = true;
+  const validateForm = (): boolean => {
+    const result = validateEnergyData(manualData);
+    
+    if (!result.success) {
+      const newErrors: Record<string, string> = {};
+      result.error.errors.forEach((err) => {
+        const field = err.path[0] as string;
+        newErrors[field] = err.message;
+      });
+      setErrors(newErrors);
+      return false;
+    }
 
-    fields.forEach(({ key }) => {
-      const value = manualData[key as keyof typeof manualData];
-      if (value < 0) {
-        newErrors[key] = 'Value must be positive';
-        isValid = false;
-      }
-    });
-
-    setErrors(newErrors);
-    return isValid;
+    setErrors({});
+    return true;
   };
 
   const handleNext = () => {
@@ -42,9 +49,18 @@ const EnergyDataForm = () => {
     }
   };
 
-  const handleInputChange = (key: string, value: string) => {
-    const numValue = parseFloat(value) || 0;
-    setManualData({ [key]: numValue });
+  const handleInputChange = (key: FieldKey, value: string) => {
+    // Parse and sanitize: limit to 2 decimal places
+    const parsed = parseFloat(value);
+    const numValue = isNaN(parsed) ? 0 : Math.round(parsed * 100) / 100;
+    
+    // Clamp to max value to prevent overflow
+    const maxValue = FIELD_CONFIG[key].max;
+    const clampedValue = Math.min(numValue, maxValue);
+    
+    setManualData({ [key]: clampedValue });
+    
+    // Clear error for this field if it exists
     if (errors[key]) {
       setErrors((prev) => ({ ...prev, [key]: '' }));
     }
@@ -65,46 +81,55 @@ const EnergyDataForm = () => {
       </div>
 
       <div className="grid gap-6">
-        {fields.map(({ key, label, unit, icon: Icon, color }, index) => (
-          <motion.div
-            key={key}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="group"
-          >
-            <Label htmlFor={key} className="text-sm font-medium flex items-center gap-2 mb-2">
-              <Icon className={`w-4 h-4 ${color}`} />
-              {label}
-            </Label>
-            <div className="relative">
-              <Input
-                id={key}
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="0.00"
-                value={manualData[key as keyof typeof manualData] || ''}
-                onChange={(e) => handleInputChange(key, e.target.value)}
-                className={`h-12 pr-16 text-lg font-medium ${
-                  errors[key] ? 'border-destructive focus-visible:ring-destructive' : ''
-                }`}
-              />
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium">
-                {unit}
+        {fields.map((key, index) => {
+          const config = FIELD_CONFIG[key];
+          const Icon = config.icon;
+          
+          return (
+            <motion.div
+              key={key}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="group"
+            >
+              <Label htmlFor={key} className="text-sm font-medium flex items-center gap-2 mb-2">
+                <Icon className={`w-4 h-4 ${config.color}`} />
+                {config.label}
+                <span className="text-xs text-muted-foreground ml-auto">
+                  (max: {config.max.toLocaleString()})
+                </span>
+              </Label>
+              <div className="relative">
+                <Input
+                  id={key}
+                  type="number"
+                  min="0"
+                  max={config.max}
+                  step="0.01"
+                  placeholder="0.00"
+                  value={manualData[key] || ''}
+                  onChange={(e) => handleInputChange(key, e.target.value)}
+                  className={`h-12 pr-16 text-lg font-medium ${
+                    errors[key] ? 'border-destructive focus-visible:ring-destructive' : ''
+                  }`}
+                />
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium">
+                  {config.unit}
+                </div>
               </div>
-            </div>
-            {errors[key] && (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-sm text-destructive mt-1"
-              >
-                {errors[key]}
-              </motion.p>
-            )}
-          </motion.div>
-        ))}
+              {errors[key] && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-sm text-destructive mt-1"
+                >
+                  {errors[key]}
+                </motion.p>
+              )}
+            </motion.div>
+          );
+        })}
       </div>
 
       <div className="pt-4">
