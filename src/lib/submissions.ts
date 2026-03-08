@@ -16,6 +16,7 @@ export interface Submission {
   audit_hash: string | null;
   verified_at: string | null;
   reviewed_by: string | null;
+  revision_notes: string | null;
   // Joined data
   supplier_name?: string;
   supplier_company?: string;
@@ -83,13 +84,25 @@ export const submissionsApi = {
     }));
   },
 
-  updateStatus: async (id: string, status: 'approved' | 'rejected') => {
+  getById: async (id: string): Promise<Submission | null> => {
+    const { data, error } = await supabase
+      .from('submissions')
+      .select(`*, profiles!submissions_user_id_fkey (full_name)`)
+      .eq('id', id)
+      .single();
+
+    if (error) return null;
+    return { ...data, supplier_name: (data as any).profiles?.full_name ?? 'Unknown' } as Submission;
+  },
+
+  updateStatus: async (id: string, status: 'approved' | 'rejected', revisionNotes?: string) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Not authenticated');
 
-    const updates: any = {
+    const updates: Record<string, unknown> = {
       status,
       reviewed_by: user.id,
+      revision_notes: revisionNotes ?? null,
     };
 
     if (status === 'approved') {
@@ -103,9 +116,10 @@ export const submissionsApi = {
     // Create audit log
     await supabase.from('audit_logs').insert({
       submission_id: id,
-      action: status === 'approved' ? 'APPROVED' : 'REJECTED',
+      action: status === 'approved' ? 'APPROVED' : 'REVISION_REQUESTED',
       performed_by: user.id,
       hash: 'SHA-256: ' + Array.from({ length: 64 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join(''),
+      metadata: revisionNotes ? { revision_notes: revisionNotes } : {},
     });
 
     return { success: true };

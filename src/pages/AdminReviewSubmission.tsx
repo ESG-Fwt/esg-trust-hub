@@ -8,12 +8,16 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft, FileText, Download, Shield, CheckCircle, RotateCcw,
-  Zap, Flame, Droplets, Trash2, Droplet, Hash, Calendar, User,
+  Zap, Flame, Droplets, Trash2, Droplet, Hash, Calendar, User, Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
 
 const statusConfig = {
   pending: { label: 'Pending Review', className: 'bg-status-pending-bg text-status-pending border-status-pending/30' },
@@ -26,43 +30,62 @@ const AdminReviewSubmission = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
+  const [revisionModalOpen, setRevisionModalOpen] = useState(false);
+  const [revisionNotes, setRevisionNotes] = useState('');
 
-  const { data: submissions, isLoading } = useQuery({
-    queryKey: ['submissions'],
-    queryFn: submissionsApi.getWithProfiles,
+  // Fetch this single submission by ID
+  const { data: submission, isLoading } = useQuery({
+    queryKey: ['submission', id],
+    queryFn: () => submissionsApi.getById(id!),
+    enabled: !!id,
   });
 
-  const submission = submissions?.find((s) => s.id === id);
-
+  // Resolve signed URL for file preview
   useEffect(() => {
     if (!submission?.file_url) {
       setFilePreviewUrl(null);
       return;
     }
-    supabase.storage.from('submissions').createSignedUrl(submission.file_url, 300).then(({ data }) => {
+    supabase.storage.from('submissions').createSignedUrl(submission.file_url, 600).then(({ data }) => {
       setFilePreviewUrl(data?.signedUrl ?? null);
     });
   }, [submission?.file_url]);
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: 'approved' | 'rejected' }) =>
-      submissionsApi.updateStatus(id, status),
+    mutationFn: ({ status, notes }: { status: 'approved' | 'rejected'; notes?: string }) =>
+      submissionsApi.updateStatus(id!, status, notes),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['submissions'] });
+      queryClient.invalidateQueries({ queryKey: ['submission', id] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
       if (variables.status === 'approved') {
         toast.success('Submission approved successfully.');
       } else {
         toast.info('Revision requested — supplier will be notified.');
       }
+      navigate('/admin/dashboard');
     },
   });
 
+  const handleApprove = () => {
+    updateMutation.mutate({ status: 'approved' });
+  };
+
+  const handleRevisionSubmit = () => {
+    if (!revisionNotes.trim()) {
+      toast.error('Please provide a reason for revision.');
+      return;
+    }
+    updateMutation.mutate({ status: 'rejected', notes: revisionNotes.trim() });
+  };
+
+  // ── Loading / Not found states ──
   if (isLoading) {
     return (
       <AdminLayout>
-        <div className="flex items-center justify-center h-[60vh]">
-          <div className="animate-pulse text-muted-foreground text-sm">Loading submission…</div>
+        <div className="flex items-center justify-center h-[60vh] gap-3 text-muted-foreground">
+          <Loader2 className="w-5 h-5 animate-spin" />
+          <span className="text-sm">Loading submission…</span>
         </div>
       </AdminLayout>
     );
@@ -100,14 +123,8 @@ const AdminReviewSubmission = () => {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center gap-4 pb-5 border-b border-border shrink-0"
         >
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate('/admin/dashboard')}
-            className="shrink-0"
-          >
-            <ArrowLeft className="w-4 h-4 mr-1.5" />
-            Back to Dashboard
+          <Button variant="outline" size="sm" onClick={() => navigate('/admin/dashboard')} className="shrink-0">
+            <ArrowLeft className="w-4 h-4 mr-1.5" /> Back to Dashboard
           </Button>
 
           <Separator orientation="vertical" className="h-6" />
@@ -117,25 +134,15 @@ const AdminReviewSubmission = () => {
               <h1 className="text-xl font-bold text-foreground truncate">
                 {submission.supplier_name ?? 'Unknown Supplier'}
               </h1>
-              <Badge variant="outline" className={status.className}>
-                {status.label}
-              </Badge>
+              <Badge variant="outline" className={status.className}>{status.label}</Badge>
             </div>
             <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Hash className="w-3 h-3" />
-                {submission.id.slice(0, 8)}
-              </span>
+              <span className="flex items-center gap-1"><Hash className="w-3 h-3" />{submission.id.slice(0, 8)}</span>
               <span className="flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
-                {new Date(submission.created_at).toLocaleDateString('en-US', {
-                  year: 'numeric', month: 'short', day: 'numeric',
-                })}
+                {new Date(submission.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
               </span>
-              <span className="flex items-center gap-1">
-                <User className="w-3 h-3" />
-                {submission.supplier_name ?? 'Unknown'}
-              </span>
+              <span className="flex items-center gap-1"><User className="w-3 h-3" />{submission.supplier_name ?? 'Unknown'}</span>
             </div>
           </div>
         </motion.div>
@@ -166,9 +173,7 @@ const AdminReviewSubmission = () => {
                       <span className="text-sm font-medium text-foreground">{item.label}</span>
                     </div>
                     <div className="text-right">
-                      <span className="font-mono text-sm font-semibold text-foreground">
-                        {item.value.toLocaleString()}
-                      </span>
+                      <span className="font-mono text-sm font-semibold text-foreground">{item.value.toLocaleString()}</span>
                       <span className="text-xs text-muted-foreground ml-1.5">{item.unit}</span>
                     </div>
                   </motion.div>
@@ -195,6 +200,20 @@ const AdminReviewSubmission = () => {
                 </CardContent>
               </Card>
             </motion.div>
+
+            {/* Revision Notes (if any) */}
+            {submission.revision_notes && (
+              <Card className="border-destructive/20">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-semibold text-destructive flex items-center gap-2">
+                    <RotateCcw className="w-4 h-4" /> Revision Notes
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-foreground whitespace-pre-wrap">{submission.revision_notes}</p>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Audit Trail */}
             <Card>
@@ -229,7 +248,7 @@ const AdminReviewSubmission = () => {
             </Card>
           </div>
 
-          {/* Right Column — Evidence / PDF Viewer */}
+          {/* Right Column — Evidence / Document Viewer */}
           <div className="space-y-4">
             <Card className="flex flex-col h-full">
               <CardHeader className="pb-3 shrink-0">
@@ -250,17 +269,15 @@ const AdminReviewSubmission = () => {
                 <div className="w-full h-full min-h-[500px] bg-muted/50 rounded-lg border-2 border-dashed border-border overflow-hidden">
                   {filePreviewUrl ? (
                     submission.file_url?.endsWith('.pdf') ? (
-                      <iframe
-                        src={filePreviewUrl}
-                        className="w-full h-full min-h-[500px] rounded-lg"
-                        title="PDF Document Viewer"
-                      />
+                      <object
+                        data={filePreviewUrl}
+                        type="application/pdf"
+                        className="w-full h-full min-h-[500px]"
+                      >
+                        <iframe src={filePreviewUrl} className="w-full h-full min-h-[500px]" title="PDF Viewer" />
+                      </object>
                     ) : (
-                      <img
-                        src={filePreviewUrl}
-                        alt="Uploaded evidence"
-                        className="w-full h-full object-contain p-4"
-                      />
+                      <img src={filePreviewUrl} alt="Uploaded evidence" className="w-full h-full object-contain p-4" />
                     )
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground gap-3">
@@ -288,33 +305,71 @@ const AdminReviewSubmission = () => {
             className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-sm"
           >
             <div className="max-w-screen-xl mx-auto px-6 py-4 flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                Review complete? Choose an action below.
-              </p>
+              <p className="text-sm text-muted-foreground">Review complete? Choose an action below.</p>
               <div className="flex items-center gap-3">
                 <Button
                   variant="outline"
                   size="default"
-                  onClick={() => updateMutation.mutate({ id: submission.id, status: 'rejected' })}
+                  onClick={() => setRevisionModalOpen(true)}
                   disabled={updateMutation.isPending}
                   className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
                 >
-                  <RotateCcw className="w-4 h-4 mr-2" />
-                  Request Revision
+                  <RotateCcw className="w-4 h-4 mr-2" /> Request Revision
                 </Button>
                 <Button
                   size="default"
-                  onClick={() => updateMutation.mutate({ id: submission.id, status: 'approved' })}
+                  onClick={handleApprove}
                   disabled={updateMutation.isPending}
                   className="bg-status-approved hover:bg-status-approved/90 text-white min-w-[180px]"
                 >
-                  <CheckCircle className="w-4 h-4 mr-2" />
+                  {updateMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                  )}
                   Approve Submission
                 </Button>
               </div>
             </div>
           </motion.div>
         )}
+
+        {/* ── Revision Modal ── */}
+        <Dialog open={revisionModalOpen} onOpenChange={setRevisionModalOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Request Revision</DialogTitle>
+              <DialogDescription>
+                Provide a reason so the supplier knows what to correct before resubmitting.
+              </DialogDescription>
+            </DialogHeader>
+            <Textarea
+              placeholder="e.g. Electricity figures seem too low for a facility of this size. Please double-check your utility bill and resubmit."
+              value={revisionNotes}
+              onChange={(e) => setRevisionNotes(e.target.value)}
+              rows={5}
+              className="resize-none"
+            />
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button variant="outline" size="sm" onClick={() => setRevisionModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleRevisionSubmit}
+                disabled={updateMutation.isPending || !revisionNotes.trim()}
+              >
+                {updateMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                )}
+                Submit Revision Request
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </AdminLayout>
   );
