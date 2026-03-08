@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { submissionsApi } from '@/lib/submissions';
+import { submissionsApi, calculateEmissions } from '@/lib/submissions';
 import type { Submission } from '@/lib/submissions';
 
 describe('submissionsApi.exportCSV', () => {
