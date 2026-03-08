@@ -52,6 +52,51 @@ export type Database = {
           },
         ]
       }
+      compliance_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          deadline_id: string | null
+          id: string
+          is_read: boolean
+          message: string
+          organization_id: string | null
+        }
+        Insert: {
+          alert_type?: string
+          created_at?: string
+          deadline_id?: string | null
+          id?: string
+          is_read?: boolean
+          message: string
+          organization_id?: string | null
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          deadline_id?: string | null
+          id?: string
+          is_read?: boolean
+          message?: string
+          organization_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_alerts_deadline_id_fkey"
+            columns: ["deadline_id"]
+            isOneToOne: false
+            referencedRelation: "submission_deadlines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_alerts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           created_at: string
@@ -98,6 +143,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      submission_deadlines: {
+        Row: {
+          created_at: string
+          created_by: string
+          due_date: string
+          id: string
+          organization_id: string
+          period_label: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          due_date: string
+          id?: string
+          organization_id: string
+          period_label: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          due_date?: string
+          id?: string
+          organization_id?: string
+          period_label?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submission_deadlines_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"

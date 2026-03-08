@@ -1,4 +1,4 @@
-import { LayoutDashboard, FileText, Building2, Users, Shield, LogOut } from 'lucide-react';
+import { LayoutDashboard, FileText, Building2, Users, Shield, LogOut, BarChart3, FileBarChart, Bell } from 'lucide-react';
 import logoImg from '@/assets/esg-chain-logo.png';
 import { NavLink } from '@/components/NavLink';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -14,6 +14,9 @@ import { Button } from '@/components/ui/button';
 const navItemKeys = [
   { key: 'nav.dashboard', url: '/admin/dashboard', icon: LayoutDashboard },
   { key: 'nav.submissions', url: '/admin/submissions', icon: FileText },
+  { key: 'nav.benchmarking', url: '/admin/benchmarking', icon: BarChart3 },
+  { key: 'nav.reports', url: '/admin/reports', icon: FileBarChart },
+  { key: 'nav.alerts', url: '/admin/alerts', icon: Bell },
   { key: 'nav.organizations', url: '/admin/organizations', icon: Building2 },
   { key: 'nav.users', url: '/admin/users', icon: Users },
   { key: 'nav.auditTrail', url: '/admin/audit', icon: Shield },
