@@ -8,10 +8,14 @@ import { Label } from '@/components/ui/label';
 import { useAuthStore, UserRole } from '@/stores/authStore';
 import { lovable } from '@/integrations/lovable/index';
 import { toast } from 'sonner';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { LanguageToggle } from '@/components/LanguageToggle';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const Login = () => {
   const navigate = useNavigate();
   const { login, signup, isAuthenticated, role } = useAuthStore();
+  const { t } = useLanguage();
   const [selectedRole, setSelectedRole] = useState<UserRole>('supplier');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -71,21 +75,26 @@ const Login = () => {
     {
       role: 'supplier' as UserRole,
       icon: Building2,
-      title: 'Supplier',
-      description: 'Submit energy data & upload invoices',
+      title: t('auth.supplier'),
+      description: t('auth.supplierDesc'),
       gradient: 'from-emerald-500 to-emerald-700',
     },
     {
       role: 'manager' as UserRole,
       icon: Users,
-      title: 'ESG Manager',
-      description: 'Review submissions & approve data',
+      title: t('auth.manager'),
+      description: t('auth.managerDesc'),
       gradient: 'from-slate-600 to-slate-800',
     },
   ];
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex relative">
+      {/* Top-right controls */}
+      <div className="absolute top-4 right-4 z-50 flex items-center gap-1">
+        <LanguageToggle />
+        <ThemeToggle />
+      </div>
       {/* Left Panel - Branding */}
       <motion.div
         initial={{ opacity: 0, x: -50 }}
@@ -108,18 +117,16 @@ const Login = () => {
 
           <div className="space-y-6">
             <h1 className="text-5xl font-bold text-white leading-tight">
-              Enterprise ESG
+              {t('brand.title').split(' ').slice(0, 2).join(' ')}
               <br />
-              Data Platform
+              {t('brand.title').split(' ').slice(2).join(' ')}
             </h1>
-            <p className="text-xl text-white/80 max-w-md">
-              AI-powered data extraction with immutable audit trails. Compliance made simple for CSRD & EUDR regulations.
-            </p>
+            <p className="text-xl text-white/80 max-w-md">{t('brand.subtitle')}</p>
           </div>
         </div>
 
         <div className="relative z-10 space-y-4">
-          {['AI-Powered Document Extraction', 'Immutable Blockchain Audit Trail', 'CSRD & EUDR Compliance Ready'].map((text) => (
+          {[t('brand.feature1'), t('brand.feature2'), t('brand.feature3')].map((text) => (
             <div key={text} className="flex items-center gap-3 text-white/80">
               <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
                 <span className="text-sm font-medium">✓</span>
@@ -147,9 +154,9 @@ const Login = () => {
           </div>
 
           <div className="text-center lg:text-left">
-            <h2 className="text-3xl font-bold text-foreground">{isSignup ? 'Create account' : 'Welcome back'}</h2>
+            <h2 className="text-3xl font-bold text-foreground">{isSignup ? t('auth.createAccount') : t('auth.welcomeBack')}</h2>
             <p className="mt-2 text-muted-foreground">
-              {isSignup ? 'Select your role and create an account' : 'Sign in to continue'}
+              {isSignup ? t('auth.selectRole') : t('auth.signInContinue')}
             </p>
           </div>
 
@@ -188,7 +195,7 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="space-y-5">
             {isSignup && (
               <div className="space-y-2">
-                <Label htmlFor="fullName" className="text-sm font-medium">Full Name</Label>
+                <Label htmlFor="fullName" className="text-sm font-medium">{t('auth.fullName')}</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <Input
@@ -204,7 +211,7 @@ const Login = () => {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+              <Label htmlFor="email" className="text-sm font-medium">{t('auth.email')}</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
@@ -219,7 +226,7 @@ const Login = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+              <Label htmlFor="password" className="text-sm font-medium">{t('auth.password')}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
@@ -237,11 +244,11 @@ const Login = () => {
               {isLoading ? (
                 <span className="flex items-center gap-2">
                   <span className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                  {isSignup ? 'Creating account...' : 'Signing in...'}
+                  {isSignup ? t('auth.creatingAccount') : t('auth.signingIn')}
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
-                  {isSignup ? 'Create Account' : 'Sign In'}
+                  {isSignup ? t('auth.createAccount') : t('auth.signIn')}
                   <ArrowRight className="w-5 h-5" />
                 </span>
               )}
@@ -251,7 +258,7 @@ const Login = () => {
           {/* Divider */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
-            <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">Or continue with</span></div>
+            <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">{t('auth.orContinue')}</span></div>
           </div>
 
           {/* Social Login */}
@@ -269,14 +276,14 @@ const Login = () => {
           <div className="text-center space-y-2">
             {!isSignup && (
               <p className="text-sm">
-                <Link to="/forgot-password" className="text-muted-foreground hover:text-primary hover:underline">Forgot your password?</Link>
+                <Link to="/forgot-password" className="text-muted-foreground hover:text-primary hover:underline">{t('auth.forgotPassword')}</Link>
               </p>
             )}
             <p className="text-sm text-muted-foreground">
               {isSignup ? (
-                <>Already have an account? <button type="button" onClick={() => setIsSignup(false)} className="text-primary font-medium hover:underline">Sign in</button></>
+                <>{t('auth.hasAccount')} <button type="button" onClick={() => setIsSignup(false)} className="text-primary font-medium hover:underline">{t('auth.signInLink')}</button></>
               ) : (
-                <>Don't have an account? <button type="button" onClick={() => setIsSignup(true)} className="text-primary font-medium hover:underline">Create one</button></>
+                <>{t('auth.noAccount')} <button type="button" onClick={() => setIsSignup(true)} className="text-primary font-medium hover:underline">{t('auth.createOne')}</button></>
               )}
             </p>
           </div>

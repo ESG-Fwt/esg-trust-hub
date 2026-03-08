@@ -2,6 +2,7 @@ import { Leaf, LayoutDashboard, FileText, Building2, Users, Settings, LogOut, Ch
 import { NavLink } from '@/components/NavLink';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, useSidebar,
@@ -9,11 +10,11 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 
-const navItems = [
-  { title: 'Dashboard', url: '/admin/dashboard', icon: LayoutDashboard },
-  { title: 'Submissions', url: '/admin/submissions', icon: FileText },
-  { title: 'Organizations', url: '/admin/organizations', icon: Building2 },
-  { title: 'Users', url: '/admin/users', icon: Users },
+const navItemKeys = [
+  { key: 'nav.dashboard', url: '/admin/dashboard', icon: LayoutDashboard },
+  { key: 'nav.submissions', url: '/admin/submissions', icon: FileText },
+  { key: 'nav.organizations', url: '/admin/organizations', icon: Building2 },
+  { key: 'nav.users', url: '/admin/users', icon: Users },
 ];
 
 export function AdminSidebar() {
@@ -22,6 +23,7 @@ export function AdminSidebar() {
   const { profile, logout } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useLanguage();
 
   const handleLogout = async () => {
     await logout();
@@ -44,20 +46,20 @@ export function AdminSidebar() {
         {!collapsed && (
           <div className="overflow-hidden">
             <span className="text-sm font-semibold text-sidebar-foreground block truncate">ESG Chain</span>
-            <span className="text-[11px] text-muted-foreground">Command Center</span>
+            <span className="text-[11px] text-muted-foreground">{t('nav.commandCenter')}</span>
           </div>
         )}
       </div>
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/70">Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/70">{t('nav.navigation')}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => {
+              {navItemKeys.map((item) => {
                 const active = location.pathname === item.url;
                 return (
-                  <SidebarMenuItem key={item.title}>
+                  <SidebarMenuItem key={item.key}>
                     <SidebarMenuButton asChild>
                       <NavLink
                         to={item.url}
@@ -68,7 +70,7 @@ export function AdminSidebar() {
                         activeClassName=""
                       >
                         <item.icon className="w-4 h-4 shrink-0" />
-                        {!collapsed && <span className="truncate">{item.title}</span>}
+                        {!collapsed && <span className="truncate">{t(item.key)}</span>}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -87,7 +89,7 @@ export function AdminSidebar() {
           {!collapsed && (
             <div className="flex-1 min-w-0">
               <p className="text-xs font-medium text-sidebar-foreground truncate">{profile?.full_name}</p>
-              <p className="text-[10px] text-muted-foreground">Manager</p>
+              <p className="text-[10px] text-muted-foreground">{t('auth.manager')}</p>
             </div>
           )}
           {!collapsed && (

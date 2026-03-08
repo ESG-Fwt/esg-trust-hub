@@ -1,5 +1,7 @@
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AdminSidebar } from './AdminSidebar';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { LanguageToggle } from '@/components/LanguageToggle';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -14,6 +16,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           <header className="h-14 flex items-center border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-40 px-4">
             <SidebarTrigger className="mr-4" />
             <div className="flex-1" />
+            <div className="flex items-center gap-1">
+              <LanguageToggle />
+              <ThemeToggle />
+            </div>
           </header>
           <main className="flex-1 p-6 overflow-auto">
             {children}

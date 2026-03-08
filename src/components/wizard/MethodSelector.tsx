@@ -1,9 +1,11 @@
 import { motion } from 'framer-motion';
 import { PenLine, Sparkles, ArrowRight } from 'lucide-react';
 import { useWizardStore } from '@/stores/wizardStore';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const MethodSelector = () => {
   const { setSubmissionMethod, nextStep } = useWizardStore();
+  const { t } = useLanguage();
 
   const handleSelect = (method: 'manual' | 'smart') => {
     setSubmissionMethod(method);
@@ -17,10 +19,8 @@ const MethodSelector = () => {
       className="max-w-2xl mx-auto space-y-8"
     >
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold text-foreground">How would you like to submit?</h2>
-        <p className="text-muted-foreground">
-          Choose manual entry or let our AI extract data from your invoices
-        </p>
+        <h2 className="text-2xl font-bold text-foreground">{t('wizard.howSubmit')}</h2>
+        <p className="text-muted-foreground">{t('wizard.chooseMethod')}</p>
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4">
@@ -34,12 +34,10 @@ const MethodSelector = () => {
           <div className="w-14 h-14 rounded-xl bg-muted flex items-center justify-center mb-4 group-hover:bg-accent transition-colors">
             <PenLine className="w-7 h-7 text-muted-foreground group-hover:text-primary transition-colors" />
           </div>
-          <h3 className="text-lg font-semibold text-foreground mb-2">Manual Entry</h3>
-          <p className="text-sm text-muted-foreground text-center">
-            Type in your electricity, gas, fuel, and waste consumption values directly
-          </p>
+          <h3 className="text-lg font-semibold text-foreground mb-2">{t('wizard.manualEntry')}</h3>
+          <p className="text-sm text-muted-foreground text-center">{t('wizard.manualDesc')}</p>
           <div className="mt-4 flex items-center gap-1 text-sm font-medium text-muted-foreground group-hover:text-primary transition-colors">
-            Get started <ArrowRight className="w-4 h-4" />
+            {t('wizard.getStarted')} <ArrowRight className="w-4 h-4" />
           </div>
         </motion.button>
 
@@ -52,18 +50,16 @@ const MethodSelector = () => {
         >
           <div className="absolute -top-3 right-4">
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-primary text-primary-foreground text-xs font-medium">
-              <Sparkles className="w-3 h-3" /> Recommended
+              <Sparkles className="w-3 h-3" /> {t('wizard.recommended')}
             </span>
           </div>
           <div className="w-14 h-14 rounded-xl bg-accent flex items-center justify-center mb-4 group-hover:bg-primary/10 transition-colors">
             <Sparkles className="w-7 h-7 text-primary" />
           </div>
-          <h3 className="text-lg font-semibold text-foreground mb-2">Smart Upload</h3>
-          <p className="text-sm text-muted-foreground text-center">
-            Upload an invoice or bill and our AI will automatically extract the energy data
-          </p>
+          <h3 className="text-lg font-semibold text-foreground mb-2">{t('wizard.smartUpload')}</h3>
+          <p className="text-sm text-muted-foreground text-center">{t('wizard.smartDesc')}</p>
           <div className="mt-4 flex items-center gap-1 text-sm font-medium text-primary">
-            Upload document <ArrowRight className="w-4 h-4" />
+            {t('wizard.uploadDoc')} <ArrowRight className="w-4 h-4" />
           </div>
         </motion.button>
       </div>
