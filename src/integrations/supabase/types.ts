@@ -116,6 +116,7 @@ export type Database = {
           id: string
           organization_id: string | null
           reviewed_by: string | null
+          revision_notes: string | null
           status: string
           total_emissions: number
           updated_at: string
@@ -133,6 +134,7 @@ export type Database = {
           id?: string
           organization_id?: string | null
           reviewed_by?: string | null
+          revision_notes?: string | null
           status?: string
           total_emissions?: number
           updated_at?: string
@@ -150,6 +152,7 @@ export type Database = {
           id?: string
           organization_id?: string | null
           reviewed_by?: string | null
+          revision_notes?: string | null
           status?: string
           total_emissions?: number
           updated_at?: string
