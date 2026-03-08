@@ -221,8 +221,6 @@ const AdminReviewSubmission = () => {
             {exporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <PackageCheck className="w-4 h-4 mr-2" />}
             {t('adminReview.exportAuditPackage')}
           </Button>
-            </div>
-          </div>
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-6 flex-1 min-h-0 pt-6 pb-24 overflow-y-auto">
