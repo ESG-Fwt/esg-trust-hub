@@ -10,17 +10,19 @@ export interface EnergyData {
 
 interface WizardState {
   currentStep: number;
+  submissionMethod: 'manual' | 'smart' | null;
   manualData: EnergyData;
   aiExtractedData: EnergyData | null;
   uploadedFileName: string | null;
   isAIProcessing: boolean;
   isSubmitting: boolean;
   submissionComplete: boolean;
-  
+
   // Actions
   setStep: (step: number) => void;
   nextStep: () => void;
   prevStep: () => void;
+  setSubmissionMethod: (method: 'manual' | 'smart') => void;
   setManualData: (data: Partial<EnergyData>) => void;
   setAIExtractedData: (data: EnergyData) => void;
   setUploadedFileName: (name: string | null) => void;
@@ -41,6 +43,7 @@ export const useWizardStore = create<WizardState>()(
   persist(
     (set) => ({
       currentStep: 1,
+      submissionMethod: null,
       manualData: initialEnergyData,
       aiExtractedData: null,
       uploadedFileName: null,
@@ -51,6 +54,7 @@ export const useWizardStore = create<WizardState>()(
       setStep: (step) => set({ currentStep: step }),
       nextStep: () => set((state) => ({ currentStep: Math.min(state.currentStep + 1, 3) })),
       prevStep: () => set((state) => ({ currentStep: Math.max(state.currentStep - 1, 1) })),
+      setSubmissionMethod: (method) => set({ submissionMethod: method }),
       setManualData: (data) =>
         set((state) => ({ manualData: { ...state.manualData, ...data } })),
       setAIExtractedData: (data) => set({ aiExtractedData: data }),
@@ -61,6 +65,7 @@ export const useWizardStore = create<WizardState>()(
       resetWizard: () =>
         set({
           currentStep: 1,
+          submissionMethod: null,
           manualData: initialEnergyData,
           aiExtractedData: null,
           uploadedFileName: null,

@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, FileText, CheckCircle2, Sparkles, Shield, Brain, ArrowLeft, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useWizardStore } from '@/stores/wizardStore';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 type ProcessingStage = 'idle' | 'uploading' | 'scanning' | 'extracting' | 'complete' | 'error';
@@ -15,6 +14,7 @@ const SmartUpload = () => {
   const [fileName, setFileName] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<number | null>(null);
   const [notes, setNotes] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const processingStages = [
     { key: 'uploading', label: 'Uploading file...', icon: Upload },
@@ -24,9 +24,16 @@ const SmartUpload = () => {
   ];
 
   const processFile = async (file: File) => {
+    // Validate file size (4MB limit for AI extraction)
+    if (file.size > 4 * 1024 * 1024) {
+      toast.error('File too large. Maximum 4MB for AI extraction.');
+      return;
+    }
+
     setFileName(file.name);
     setUploadedFileName(file.name);
     setIsAIProcessing(true);
+    setErrorMessage('');
 
     try {
       setProcessingStage('uploading');
@@ -37,15 +44,38 @@ const SmartUpload = () => {
 
       setProcessingStage('extracting');
 
-      // Call real AI extraction edge function
+      // Call AI extraction edge function using fetch directly
+      // supabase.functions.invoke can have issues with FormData
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
       const formData = new FormData();
       formData.append('file', file);
 
-      const { data, error } = await supabase.functions.invoke('extract-energy', {
+      const response = await fetch(`${supabaseUrl}/functions/v1/extract-energy`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${supabaseKey}`,
+        },
         body: formData,
       });
 
-      if (error) throw new Error(error.message || 'AI extraction failed');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        if (response.status === 429) {
+          throw new Error('Rate limit exceeded. Please wait a moment and try again.');
+        }
+        if (response.status === 402) {
+          throw new Error('AI usage limit reached. Please try manual entry.');
+        }
+        if (response.status === 413) {
+          throw new Error('File too large. Please use a smaller file (max 4MB).');
+        }
+        throw new Error(errorData?.error || 'AI extraction failed');
+      }
+
+      const data = await response.json();
+
       if (!data?.success) throw new Error(data?.error || 'Could not extract data');
 
       setProcessingStage('complete');
@@ -61,6 +91,7 @@ const SmartUpload = () => {
     } catch (err: any) {
       setProcessingStage('error');
       setIsAIProcessing(false);
+      setErrorMessage(err?.message ?? 'AI extraction failed.');
       toast.error(err?.message ?? 'AI extraction failed. Try again or enter data manually.');
     }
   };
@@ -79,6 +110,12 @@ const SmartUpload = () => {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) processFile(file);
+  };
+
+  const handleSwitchToManual = () => {
+    const { setSubmissionMethod } = useWizardStore.getState();
+    setSubmissionMethod('manual');
+    // Stay on step 2 but now it will render EnergyDataForm
   };
 
   const currentStageIndex = processingStages.findIndex((s) => s.key === processingStage);
@@ -102,7 +139,7 @@ const SmartUpload = () => {
                 <AlertCircle className="w-5 h-5 text-destructive shrink-0" />
                 <div>
                   <p className="text-sm font-medium text-destructive">Extraction failed</p>
-                  <p className="text-xs text-muted-foreground">Try a different file or enter data manually</p>
+                  <p className="text-xs text-muted-foreground">{errorMessage || 'Try a different file or switch to manual entry'}</p>
                 </div>
               </motion.div>
             )}
@@ -111,13 +148,13 @@ const SmartUpload = () => {
               onDrop={handleDrop}
               onDragOver={(e) => { e.preventDefault(); setIsDragActive(true); }}
               onDragLeave={(e) => { e.preventDefault(); setIsDragActive(false); }}
-              className={`upload-zone cursor-pointer flex flex-col items-center justify-center p-12 ${isDragActive ? 'active border-primary' : 'border-border'}`}
+              className={`upload-zone cursor-pointer flex flex-col items-center justify-center p-12 rounded-xl border-2 border-dashed transition-colors ${isDragActive ? 'border-primary bg-accent/50' : 'border-border hover:border-primary/40'}`}
             >
               <motion.div animate={{ scale: isDragActive ? 1.1 : 1 }} className="w-16 h-16 rounded-2xl bg-accent flex items-center justify-center mb-4">
                 <Upload className="w-8 h-8 text-primary" />
               </motion.div>
               <p className="text-lg font-medium text-foreground mb-1">{isDragActive ? 'Drop your file here' : 'Drag & drop your invoice'}</p>
-              <p className="text-sm text-muted-foreground">or click to browse (PDF, PNG, JPG)</p>
+              <p className="text-sm text-muted-foreground">or click to browse (PDF, PNG, JPG — max 4MB)</p>
               <input id="file-upload" type="file" accept=".pdf,image/*" onChange={handleFileSelect} className="hidden" />
             </label>
           </motion.div>
@@ -144,9 +181,9 @@ const SmartUpload = () => {
                     className={`flex items-center gap-4 p-3 rounded-lg transition-colors ${isActive ? 'bg-accent' : ''}`}
                   >
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                      isComplete ? 'bg-primary text-primary-foreground' : isActive ? 'bg-primary text-primary-foreground animate-pulse-soft' : 'bg-muted text-muted-foreground'
+                      isComplete ? 'bg-primary text-primary-foreground' : isActive ? 'bg-primary text-primary-foreground animate-pulse' : 'bg-muted text-muted-foreground'
                     }`}>
-                      {isComplete ? <CheckCircle2 className="w-5 h-5" /> : <stage.icon className={`w-5 h-5 ${isActive ? 'animate-spin-slow' : ''}`} />}
+                      {isComplete ? <CheckCircle2 className="w-5 h-5" /> : <stage.icon className="w-5 h-5" />}
                     </div>
                     <span className={`font-medium ${isPending ? 'text-muted-foreground' : 'text-foreground'}`}>{stage.label}</span>
                   </motion.div>
@@ -174,7 +211,9 @@ const SmartUpload = () => {
           <Button variant="outline" onClick={prevStep} className="flex-1 h-12">
             <ArrowLeft className="w-5 h-5 mr-2" /> Back
           </Button>
-          <Button variant="ghost" onClick={nextStep} className="flex-1 h-12">Skip to Review</Button>
+          <Button variant="ghost" onClick={handleSwitchToManual} className="flex-1 h-12">
+            Enter data manually instead
+          </Button>
         </div>
       )}
     </motion.div>
