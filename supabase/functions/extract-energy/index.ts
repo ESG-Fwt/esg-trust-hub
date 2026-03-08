@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB limit for base64 in edge functions
+const MAX_FILE_SIZE = 4 * 1024 * 1024;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -36,15 +36,24 @@ serve(async (req) => {
     const base64 = base64Encode(new Uint8Array(arrayBuffer));
     const mimeType = file.type || "image/png";
 
-    const systemPrompt = `You are an ESG energy data extraction specialist. Extract energy consumption data from the uploaded document (invoice, utility bill, report, etc.).
+    const systemPrompt = `You are a strict, highly accurate data extraction auditor for an ESG compliance platform. You are provided with an image or document uploaded by an Italian SME.
 
-Return ONLY the structured data using the provided tool. Extract these fields:
-- electricity: in kWh (kilowatt-hours)
-- gas: in m³ (cubic meters of natural gas)
-- fuel: in L (liters of fuel/diesel/petrol)
-- waste: in kg (kilograms of waste)
+Your Task: Extract energy consumption data for the billing period shown.
 
-If a field is not found in the document, set it to 0. Look for totals, consumption figures, usage amounts. Convert units if needed (e.g., MWh to kWh = multiply by 1000).`;
+Strict Rules & Edge Cases:
+
+1. WRONG DOCUMENT: If this document is clearly NOT a utility bill or energy invoice (e.g., it is a restaurant receipt, a selfie, a random letter, a non-energy document), do not guess. You MUST use the error_code "ERROR_INVALID_DOC".
+
+2. UNREADABLE / BLURRY: If the document IS a utility bill or energy invoice, but the text is too blurry, cropped, obscured, or low-resolution to read the consumption numbers with high confidence, you MUST use the error_code "ERROR_UNREADABLE".
+
+3. SUCCESS: If you can clearly read the energy consumption data, extract ALL available metrics:
+   - electricity: in kWh (kilowatt-hours). Convert MWh to kWh (×1000).
+   - gas: in m³ (cubic meters of natural gas). Convert Smc to m³ if needed.
+   - fuel: in L (liters of fuel/diesel/petrol)
+   - waste: in kg (kilograms of waste)
+   Set any field to 0 if it is not present in the document.
+
+Always use the extract_energy_data tool to return your result.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -65,7 +74,7 @@ If a field is not found in the document, set it to 0. Look for totals, consumpti
               },
               {
                 type: "text",
-                text: "Extract all energy consumption data from this document. Use the extract_energy_data tool to return structured results.",
+                text: "Analyze this document. If it is NOT a utility bill or energy invoice, return error_code ERROR_INVALID_DOC. If it IS a bill but unreadable, return error_code ERROR_UNREADABLE. Otherwise extract energy data. Use the extract_energy_data tool.",
               },
             ],
           },
@@ -75,18 +84,28 @@ If a field is not found in the document, set it to 0. Look for totals, consumpti
             type: "function",
             function: {
               name: "extract_energy_data",
-              description: "Return structured energy consumption data extracted from the document",
+              description: "Return structured energy consumption data or an error code if the document is invalid or unreadable",
               parameters: {
                 type: "object",
                 properties: {
-                  electricity: { type: "number", description: "Electricity consumption in kWh" },
-                  gas: { type: "number", description: "Natural gas consumption in m³" },
-                  fuel: { type: "number", description: "Fuel consumption in liters" },
-                  waste: { type: "number", description: "Waste in kg" },
-                  confidence: { type: "number", description: "Confidence score 0-1" },
-                  notes: { type: "string", description: "Brief extraction notes" },
+                  status: {
+                    type: "string",
+                    enum: ["success", "error"],
+                    description: "Whether extraction succeeded or failed",
+                  },
+                  error_code: {
+                    type: "string",
+                    enum: ["ERROR_INVALID_DOC", "ERROR_UNREADABLE"],
+                    description: "Error code if status is error. null if success.",
+                  },
+                  electricity: { type: "number", description: "Electricity consumption in kWh. 0 if not found or if error." },
+                  gas: { type: "number", description: "Natural gas consumption in m³. 0 if not found or if error." },
+                  fuel: { type: "number", description: "Fuel consumption in liters. 0 if not found or if error." },
+                  waste: { type: "number", description: "Waste in kg. 0 if not found or if error." },
+                  confidence: { type: "number", description: "Confidence score 0-1. 0 if error." },
+                  notes: { type: "string", description: "Brief extraction notes or reason for error" },
                 },
-                required: ["electricity", "gas", "fuel", "waste", "confidence"],
+                required: ["status", "electricity", "gas", "fuel", "waste", "confidence"],
                 additionalProperties: false,
               },
             },
@@ -118,12 +137,25 @@ If a field is not found in the document, set it to 0. Look for totals, consumpti
     const toolCall = result.choices?.[0]?.message?.tool_calls?.[0];
 
     if (!toolCall) {
-      return new Response(JSON.stringify({ error: "AI could not extract data from this document" }), {
+      return new Response(JSON.stringify({ error: "AI could not extract data from this document", error_code: "ERROR_UNREADABLE" }), {
         status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const extracted = JSON.parse(toolCall.function.arguments);
+
+    // Handle error statuses from the AI
+    if (extracted.status === "error") {
+      const errorCode = extracted.error_code || "ERROR_UNREADABLE";
+      return new Response(JSON.stringify({
+        success: false,
+        error_code: errorCode,
+        notes: extracted.notes || "",
+      }), {
+        status: 422,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     return new Response(JSON.stringify({
       success: true,
