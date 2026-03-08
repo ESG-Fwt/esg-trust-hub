@@ -27,7 +27,6 @@ export const submissionsApi = {
     if (!user) throw new Error('Not authenticated');
 
     const profile = await supabase.from('profiles').select('organization_id').eq('user_id', user.id).single();
-    if (!profile.data?.organization_id) throw new Error('No organization assigned');
 
     const totalEmissions = Math.round(
       data.electricity * 0.5 + data.gas * 2.0 + data.fuel * 2.5 + data.waste * 0.3
@@ -35,7 +34,7 @@ export const submissionsApi = {
 
     const { data: submission, error } = await supabase.from('submissions').insert({
       user_id: user.id,
-      organization_id: profile.data.organization_id,
+      organization_id: profile.data?.organization_id ?? null,
       electricity: data.electricity,
       gas: data.gas,
       fuel: data.fuel,
