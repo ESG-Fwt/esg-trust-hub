@@ -217,6 +217,12 @@ const AdminReviewSubmission = () => {
               <span className="flex items-center gap-1"><User className="w-3 h-3" />{submission.supplier_name ?? t('common.unknown')}</span>
             </div>
           </div>
+          <Button variant="outline" size="sm" onClick={handleExportAuditPackage} disabled={exporting} className="shrink-0">
+            {exporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <PackageCheck className="w-4 h-4 mr-2" />}
+            {t('adminReview.exportAuditPackage')}
+          </Button>
+            </div>
+          </div>
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-6 flex-1 min-h-0 pt-6 pb-24 overflow-y-auto">
