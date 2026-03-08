@@ -13,6 +13,9 @@ import ResetPassword from "./pages/ResetPassword";
 import SupplierSubmit from "./pages/supplier/SupplierSubmit";
 import SupplierHistory from "./pages/supplier/SupplierHistory";
 import SupplierProfile from "./pages/supplier/SupplierProfile";
+import SupplierESGProfile from "./pages/supplier/SupplierESGProfile";
+import SupplierShareProfile from "./pages/supplier/SupplierShareProfile";
+import PublicESGProfile from "./pages/PublicESGProfile";
 import SubmissionSuccess from "./pages/SubmissionSuccess";
 import ManagerDashboard from "./pages/ManagerDashboard";
 import AdminSubmissions from "./pages/AdminSubmissions";
@@ -23,6 +26,7 @@ import AdminAuditTrail from "./pages/AdminAuditTrail";
 import AdminBenchmarking from "./pages/AdminBenchmarking";
 import AdminReports from "./pages/AdminReports";
 import AdminAlerts from "./pages/AdminAlerts";
+import AdminWebhooks from "./pages/AdminWebhooks";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -58,6 +62,12 @@ const AppRoutes = () => {
       } />
       <Route path="/supplier/profile" element={
         <ProtectedRoute requiredRole="supplier"><SupplierProfile /></ProtectedRoute>
+      } />
+      <Route path="/supplier/esg-profile" element={
+        <ProtectedRoute requiredRole="supplier"><SupplierESGProfile /></ProtectedRoute>
+      } />
+      <Route path="/supplier/share" element={
+        <ProtectedRoute requiredRole="supplier"><SupplierShareProfile /></ProtectedRoute>
       } />
       <Route path="/submission/success" element={
         <ProtectedRoute requiredRole="supplier"><SubmissionSuccess /></ProtectedRoute>
@@ -97,6 +107,12 @@ const AppRoutes = () => {
       <Route path="/admin/alerts" element={
         <ProtectedRoute requiredRole="manager"><AdminAlerts /></ProtectedRoute>
       } />
+      <Route path="/admin/webhooks" element={
+        <ProtectedRoute requiredRole="manager"><AdminWebhooks /></ProtectedRoute>
+      } />
+
+      {/* Public ESG Profile */}
+      <Route path="/esg-profile/:token" element={<PublicESGProfile />} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>
