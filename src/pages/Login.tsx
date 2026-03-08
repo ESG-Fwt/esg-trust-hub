@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Leaf, Building2, Users, ArrowRight, Lock, Mail, User } from 'lucide-react';
+import { Building2, Users, ArrowRight, Lock, Mail, User } from 'lucide-react';
+import logoImg from '@/assets/esg-chain-logo.png';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -109,9 +110,7 @@ const Login = () => {
 
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-16">
-            <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-              <Leaf className="w-7 h-7 text-white" />
-            </div>
+            <img src={logoImg} alt="ESG Chain" className="w-12 h-12 rounded-xl" />
             <span className="text-2xl font-semibold text-white tracking-tight">ESG Chain</span>
           </div>
 
@@ -147,9 +146,7 @@ const Login = () => {
         >
           {/* Mobile Logo */}
           <div className="lg:hidden flex items-center gap-3 justify-center mb-8">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-              <Leaf className="w-6 h-6 text-primary-foreground" />
-            </div>
+            <img src={logoImg} alt="ESG Chain" className="w-10 h-10 rounded-xl" />
             <span className="text-xl font-semibold text-foreground">ESG Chain</span>
           </div>
 

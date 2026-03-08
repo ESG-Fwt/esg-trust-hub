@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
-import { Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import logoImg from '@/assets/esg-chain-logo.png';
 import { useNavigate } from 'react-router-dom';
 import { useWizardStore } from '@/stores/wizardStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -40,9 +40,7 @@ const SubmissionWizard = () => {
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-              <Leaf className="w-6 h-6 text-primary-foreground" />
-            </div>
+            <img src={logoImg} alt="ESG Chain" className="w-10 h-10 rounded-xl" />
             <div>
               <span className="text-lg font-semibold text-foreground">ESG Chain</span>
               <p className="text-xs text-muted-foreground">Supplier Portal</p>

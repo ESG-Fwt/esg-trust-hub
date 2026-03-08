@@ -1,4 +1,5 @@
-import { Leaf, FilePlus, History, User, LogOut } from 'lucide-react';
+import { FilePlus, History, User, LogOut } from 'lucide-react';
+import logoImg from '@/assets/esg-chain-logo.png';
 import { NavLink } from '@/components/NavLink';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
@@ -39,9 +40,7 @@ export function SupplierSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <div className="p-4 flex items-center gap-3">
-        <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center shrink-0">
-          <Leaf className="w-5 h-5 text-primary-foreground" />
-        </div>
+        <img src={logoImg} alt="ESG Chain" className="w-9 h-9 rounded-lg shrink-0" />
         {!collapsed && (
           <div className="overflow-hidden">
             <span className="text-sm font-semibold text-sidebar-foreground block truncate">ESG Chain</span>
