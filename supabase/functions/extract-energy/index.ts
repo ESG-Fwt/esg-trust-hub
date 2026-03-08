@@ -84,7 +84,7 @@ Always use the extract_energy_data tool to return your result.`;
               },
               {
                 type: "text",
-                text: "Analyze this document. If it is NOT a utility bill or energy invoice, return error_code ERROR_INVALID_DOC. If it IS a bill but unreadable, return error_code ERROR_UNREADABLE. Otherwise extract energy data including water consumption. Use the extract_energy_data tool.",
+                text: "Analyze this document. If it is NOT a utility bill or energy invoice, return error_code ERROR_INVALID_DOC. If it IS a bill but unreadable, return error_code ERROR_UNREADABLE. Otherwise extract energy data including water consumption. For gas bills: extract ONLY the billed volume (Smc/m³) for the billing period — do NOT sum Euro amounts and do NOT use annual averages. Round gas volume down to the nearest integer. Use the extract_energy_data tool.",
               },
             ],
           },
