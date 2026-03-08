@@ -3,13 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, FileText, CheckCircle2, Sparkles, Shield, Brain, ArrowLeft, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useWizardStore } from '@/stores/wizardStore';
+import { submissionsApi } from '@/lib/submissions';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 type ProcessingStage = 'idle' | 'uploading' | 'scanning' | 'extracting' | 'complete' | 'error';
 
 const SmartUpload = () => {
-  const { setAIExtractedData, setUploadedFileName, nextStep, prevStep, setIsAIProcessing } = useWizardStore();
+  const { setAIExtractedData, setUploadedFileName, setUploadedFilePath, nextStep, prevStep, setIsAIProcessing } = useWizardStore();
   const [isDragActive, setIsDragActive] = useState(false);
   const [processingStage, setProcessingStage] = useState<ProcessingStage>('idle');
   const [fileName, setFileName] = useState<string | null>(null);
@@ -37,8 +38,12 @@ const SmartUpload = () => {
     setErrorMessage('');
 
     try {
+      // Step 1: Upload file to storage bucket
       setProcessingStage('uploading');
-      await new Promise((r) => setTimeout(r, 400));
+      const filePath = await submissionsApi.uploadFile(file);
+      setUploadedFilePath(filePath);
+
+      // Step 2: Scan & extract with AI
       setProcessingStage('scanning');
       await new Promise((r) => setTimeout(r, 300));
       setProcessingStage('extracting');
