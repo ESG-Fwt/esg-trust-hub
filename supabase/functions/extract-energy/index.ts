@@ -51,6 +51,7 @@ Strict Rules & Edge Cases:
    - gas: in m³ (cubic meters of natural gas). Convert Smc to m³ if needed.
    - fuel: in L (liters of fuel/diesel/petrol)
    - waste: in kg (kilograms of waste)
+    - water: in m³ (cubic meters of water consumed)
    Set any field to 0 if it is not present in the document.
 
 Always use the extract_energy_data tool to return your result.`;
@@ -74,7 +75,7 @@ Always use the extract_energy_data tool to return your result.`;
               },
               {
                 type: "text",
-                text: "Analyze this document. If it is NOT a utility bill or energy invoice, return error_code ERROR_INVALID_DOC. If it IS a bill but unreadable, return error_code ERROR_UNREADABLE. Otherwise extract energy data. Use the extract_energy_data tool.",
+                text: "Analyze this document. If it is NOT a utility bill or energy invoice, return error_code ERROR_INVALID_DOC. If it IS a bill but unreadable, return error_code ERROR_UNREADABLE. Otherwise extract energy data including water consumption. Use the extract_energy_data tool.",
               },
             ],
           },
@@ -101,11 +102,12 @@ Always use the extract_energy_data tool to return your result.`;
                   electricity: { type: "number", description: "Electricity consumption in kWh. 0 if not found or if error." },
                   gas: { type: "number", description: "Natural gas consumption in m³. 0 if not found or if error." },
                   fuel: { type: "number", description: "Fuel consumption in liters. 0 if not found or if error." },
-                  waste: { type: "number", description: "Waste in kg. 0 if not found or if error." },
+                   waste: { type: "number", description: "Waste in kg. 0 if not found or if error." },
+                  water: { type: "number", description: "Water in m³. 0 if not found or if error." },
                   confidence: { type: "number", description: "Confidence score 0-1. 0 if error." },
                   notes: { type: "string", description: "Brief extraction notes or reason for error" },
                 },
-                required: ["status", "electricity", "gas", "fuel", "waste", "confidence"],
+                required: ["status", "electricity", "gas", "fuel", "waste", "water", "confidence"],
                 additionalProperties: false,
               },
             },
@@ -164,6 +166,7 @@ Always use the extract_energy_data tool to return your result.`;
         gas: Math.max(0, Math.round(extracted.gas * 100) / 100),
         fuel: Math.max(0, Math.round(extracted.fuel * 100) / 100),
         waste: Math.max(0, Math.round(extracted.waste * 100) / 100),
+        water: Math.max(0, Math.round((extracted.water || 0) * 100) / 100),
       },
       confidence: extracted.confidence,
       notes: extracted.notes || "",
