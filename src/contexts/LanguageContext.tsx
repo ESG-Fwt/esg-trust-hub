@@ -602,6 +602,13 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.auditTrail': 'Traccia di Audit',
     'adminSub.exportCSV': 'Esporta CSV',
     'adminSub.exported': 'CSV esportato con successo',
+    // Audit Package
+    'adminReview.exportAuditPackage': 'Esporta Pacchetto Audit',
+    'adminReview.auditExported': 'Pacchetto audit scaricato',
+    'adminReview.auditExportFailed': 'Errore nell\'esportazione del pacchetto audit',
+    // EU Sovereignty
+    'eu.badge': 'Sovranità Dati UE',
+    'eu.badgeDesc': 'Tutti i dati ospitati su server europei. Conforme al GDPR.',
     // Feedback
     'history.actionRequired': 'Azione Richiesta',
     'history.submissionNeedsRevision': 'invio necessita revisione',
