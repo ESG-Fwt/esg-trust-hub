@@ -272,6 +272,13 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.auditTrail': 'Audit Trail',
     'adminSub.exportCSV': 'Export CSV',
     'adminSub.exported': 'CSV exported successfully',
+    // Audit Package
+    'adminReview.exportAuditPackage': 'Export Audit Package',
+    'adminReview.auditExported': 'Audit package downloaded',
+    'adminReview.auditExportFailed': 'Failed to export audit package',
+    // EU Sovereignty
+    'eu.badge': 'EU Data Sovereignty',
+    'eu.badgeDesc': 'All data hosted on European servers. GDPR compliant.',
     // Feedback
     'history.actionRequired': 'Action Required',
     'history.submissionNeedsRevision': 'submission needs revision',
