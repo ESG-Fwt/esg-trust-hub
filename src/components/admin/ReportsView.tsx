@@ -179,9 +179,13 @@ const ReportsView = () => {
               <SelectItem value="rejected">{t('dashboard.rejected')}</SelectItem>
             </SelectContent>
           </Select>
-          <Button onClick={handleExportCSV} disabled={filtered.length === 0} size="sm">
+          <Button onClick={handleExportCSV} disabled={filtered.length === 0} size="sm" variant="outline">
             <FileDown className="w-4 h-4 mr-2" />
             {t('reports.exportAll')}
+          </Button>
+          <Button onClick={handleExportAuditTrail} disabled={isExportingAudit || !submissions?.length} size="sm">
+            {isExportingAudit ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Archive className="w-4 h-4 mr-2" />}
+            {t('reports.exportAuditTrail')}
           </Button>
         </div>
       </div>
