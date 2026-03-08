@@ -56,30 +56,31 @@ describe('submissionsApi.exportCSV', () => {
   });
 });
 
-describe('CO2e calculation logic', () => {
-  it('calculates total emissions correctly', () => {
+describe('calculateEmissions (dynamic factors)', () => {
+  const defaultFactors = { electricity: 0.5, gas: 2.0, fuel: 2.5, waste: 0.3, water: 0.1 };
+
+  it('calculates total emissions with default factors', () => {
     const data = { electricity: 1000, gas: 500, fuel: 200, waste: 100, water: 50 };
-    const total = Math.round(
-      data.electricity * 0.5 + data.gas * 2.0 + data.fuel * 2.5 + data.waste * 0.3 + data.water * 0.1
-    );
     // 500 + 1000 + 500 + 30 + 5 = 2035
-    expect(total).toBe(2035);
+    expect(calculateEmissions(data, defaultFactors)).toBe(2035);
   });
 
   it('handles zero input', () => {
     const data = { electricity: 0, gas: 0, fuel: 0, waste: 0, water: 0 };
-    const total = Math.round(
-      data.electricity * 0.5 + data.gas * 2.0 + data.fuel * 2.5 + data.waste * 0.3 + data.water * 0.1
-    );
-    expect(total).toBe(0);
+    expect(calculateEmissions(data, defaultFactors)).toBe(0);
   });
 
   it('handles large values without overflow', () => {
     const data = { electricity: 1000000, gas: 100000, fuel: 50000, waste: 10000, water: 100000 };
-    const total = Math.round(
-      data.electricity * 0.5 + data.gas * 2.0 + data.fuel * 2.5 + data.waste * 0.3 + data.water * 0.1
-    );
+    const total = calculateEmissions(data, defaultFactors);
     expect(total).toBeGreaterThan(0);
     expect(Number.isFinite(total)).toBe(true);
+  });
+
+  it('uses custom factors correctly', () => {
+    const customFactors = { electricity: 0.3, gas: 1.5, fuel: 2.0, waste: 0.2, water: 0.05 };
+    const data = { electricity: 100, gas: 100, fuel: 100, waste: 100, water: 100 };
+    // 30 + 150 + 200 + 20 + 5 = 405
+    expect(calculateEmissions(data, customFactors)).toBe(405);
   });
 });
