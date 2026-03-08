@@ -1,5 +1,6 @@
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Clock, TrendingUp, Factory, Users, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { Clock, TrendingUp, Factory, Users, ArrowUpRight, ArrowDownRight, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useQuery } from '@tanstack/react-query';
 import { submissionsApi } from '@/lib/submissions';
@@ -13,6 +14,7 @@ const CHART_COLORS = [
 ];
 
 const DashboardOverview = () => {
+  const navigate = useNavigate();
   const { data: stats } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: submissionsApi.getStats,
@@ -172,7 +174,9 @@ const DashboardOverview = () => {
         <CardContent className="p-0">
           <div className="divide-y divide-border">
             {submissions?.slice(0, 5).map((s) => (
-              <div key={s.id} className="flex items-center gap-4 px-6 py-3">
+              <div key={s.id} className="flex items-center gap-4 px-6 py-3 cursor-pointer hover:bg-muted/30 transition-colors group"
+                onClick={() => navigate(`/admin/review/${s.id}`)}
+              >
                 <div className={`w-2 h-2 rounded-full shrink-0 ${
                   s.status === 'approved' ? 'bg-status-approved' : s.status === 'rejected' ? 'bg-status-rejected' : 'bg-status-pending'
                 }`} />
@@ -181,6 +185,7 @@ const DashboardOverview = () => {
                   <p className="text-xs text-muted-foreground">{new Date(s.created_at).toLocaleDateString()}</p>
                 </div>
                 <span className="text-sm font-mono text-foreground">{Number(s.total_emissions).toLocaleString()} kg</span>
+                <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
             ))}
             {(!submissions || submissions.length === 0) && (

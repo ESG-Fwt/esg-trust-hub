@@ -14,6 +14,7 @@ import SupplierProfile from "./pages/supplier/SupplierProfile";
 import SubmissionSuccess from "./pages/SubmissionSuccess";
 import ManagerDashboard from "./pages/ManagerDashboard";
 import AdminSubmissions from "./pages/AdminSubmissions";
+import AdminReviewSubmission from "./pages/AdminReviewSubmission";
 import AdminOrganizations from "./pages/AdminOrganizations";
 import AdminUsers from "./pages/AdminUsers";
 import NotFound from "./pages/NotFound";
@@ -65,6 +66,9 @@ const AppRoutes = () => {
       } />
       <Route path="/admin/submissions" element={
         <ProtectedRoute requiredRole="manager"><AdminSubmissions /></ProtectedRoute>
+      } />
+      <Route path="/admin/review/:id" element={
+        <ProtectedRoute requiredRole="manager"><AdminReviewSubmission /></ProtectedRoute>
       } />
       <Route path="/admin/organizations" element={
         <ProtectedRoute requiredRole="manager"><AdminOrganizations /></ProtectedRoute>
