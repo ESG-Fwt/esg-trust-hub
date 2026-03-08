@@ -1,26 +1,31 @@
 import { SupplierLayout } from '@/components/supplier/SupplierLayout';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useWizardStore } from '@/stores/wizardStore';
 import Stepper from '@/components/wizard/Stepper';
+import MethodSelector from '@/components/wizard/MethodSelector';
 import EnergyDataForm from '@/components/wizard/EnergyDataForm';
 import SmartUpload from '@/components/wizard/SmartUpload';
 import ReviewSubmit from '@/components/wizard/ReviewSubmit';
 
 const steps = [
-  { title: 'Energy Data', description: 'Enter consumption' },
-  { title: 'Smart Upload', description: 'AI extraction' },
+  { title: 'Choose Method', description: 'Manual or AI' },
+  { title: 'Enter Data', description: 'Provide details' },
   { title: 'Review', description: 'Submit data' },
 ];
 
 const SupplierSubmit = () => {
-  const { currentStep } = useWizardStore();
+  const { currentStep, submissionMethod } = useWizardStore();
 
   const renderStep = () => {
     switch (currentStep) {
-      case 1: return <EnergyDataForm />;
-      case 2: return <SmartUpload />;
-      case 3: return <ReviewSubmit />;
-      default: return <EnergyDataForm />;
+      case 1:
+        return <MethodSelector />;
+      case 2:
+        return submissionMethod === 'smart' ? <SmartUpload /> : <EnergyDataForm />;
+      case 3:
+        return <ReviewSubmit />;
+      default:
+        return <MethodSelector />;
     }
   };
 
@@ -34,9 +39,11 @@ const SupplierSubmit = () => {
         <div className="mb-10">
           <Stepper currentStep={currentStep} steps={steps} />
         </div>
-        <motion.div key={currentStep} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
-          {renderStep()}
-        </motion.div>
+        <AnimatePresence mode="wait">
+          <motion.div key={currentStep} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
+            {renderStep()}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </SupplierLayout>
   );

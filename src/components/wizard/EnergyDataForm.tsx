@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Zap, Flame, Droplets, Trash2, ArrowRight } from 'lucide-react';
+import { Zap, Flame, Droplets, Trash2, ArrowRight, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,7 +8,6 @@ import { useWizardStore } from '@/stores/wizardStore';
 import { toast } from 'sonner';
 import { validateEnergyData } from '@/lib/validationSchemas';
 
-// Field configuration with max limits for display
 const FIELD_CONFIG = {
   electricity: { label: 'Electricity', unit: 'kWh', icon: Zap, color: 'text-amber-500', max: 1000000 },
   gas: { label: 'Natural Gas', unit: 'm³', icon: Flame, color: 'text-orange-500', max: 100000 },
@@ -19,14 +18,13 @@ const FIELD_CONFIG = {
 type FieldKey = keyof typeof FIELD_CONFIG;
 
 const EnergyDataForm = () => {
-  const { manualData, setManualData, nextStep } = useWizardStore();
+  const { manualData, setManualData, nextStep, prevStep } = useWizardStore();
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const fields: FieldKey[] = ['electricity', 'gas', 'fuel', 'waste'];
 
   const validateForm = (): boolean => {
     const result = validateEnergyData(manualData);
-    
     if (!result.success) {
       const newErrors: Record<string, string> = {};
       result.error.errors.forEach((err) => {
@@ -36,7 +34,6 @@ const EnergyDataForm = () => {
       setErrors(newErrors);
       return false;
     }
-
     setErrors({});
     return true;
   };
@@ -50,17 +47,11 @@ const EnergyDataForm = () => {
   };
 
   const handleInputChange = (key: FieldKey, value: string) => {
-    // Parse and sanitize: limit to 2 decimal places
     const parsed = parseFloat(value);
     const numValue = isNaN(parsed) ? 0 : Math.round(parsed * 100) / 100;
-    
-    // Clamp to max value to prevent overflow
     const maxValue = FIELD_CONFIG[key].max;
     const clampedValue = Math.min(numValue, maxValue);
-    
     setManualData({ [key]: clampedValue });
-    
-    // Clear error for this field if it exists
     if (errors[key]) {
       setErrors((prev) => ({ ...prev, [key]: '' }));
     }
@@ -76,7 +67,7 @@ const EnergyDataForm = () => {
       <div className="text-center space-y-2">
         <h2 className="text-2xl font-bold text-foreground">Energy Consumption Data</h2>
         <p className="text-muted-foreground">
-          Enter your monthly energy consumption. You can also upload invoices in the next step for AI extraction.
+          Enter your monthly energy consumption values below
         </p>
       </div>
 
@@ -84,7 +75,6 @@ const EnergyDataForm = () => {
         {fields.map((key, index) => {
           const config = FIELD_CONFIG[key];
           const Icon = config.icon;
-          
           return (
             <motion.div
               key={key}
@@ -119,11 +109,7 @@ const EnergyDataForm = () => {
                 </div>
               </div>
               {errors[key] && (
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="text-sm text-destructive mt-1"
-                >
+                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-sm text-destructive mt-1">
                   {errors[key]}
                 </motion.p>
               )}
@@ -132,15 +118,18 @@ const EnergyDataForm = () => {
         })}
       </div>
 
-      <div className="pt-4">
-        <Button onClick={handleNext} className="w-full h-12 text-base font-medium">
-          Continue to Smart Upload
+      <div className="flex gap-4 pt-4">
+        <Button variant="outline" onClick={prevStep} className="flex-1 h-12">
+          <ArrowLeft className="w-5 h-5 mr-2" /> Back
+        </Button>
+        <Button onClick={handleNext} className="flex-1 h-12 text-base font-medium">
+          Continue to Review
           <ArrowRight className="w-5 h-5 ml-2" />
         </Button>
       </div>
 
       <p className="text-center text-sm text-muted-foreground">
-        💡 Tip: Leave fields at 0 if not applicable. AI can auto-fill from your invoices.
+        💡 Leave fields at 0 if not applicable
       </p>
     </motion.div>
   );
