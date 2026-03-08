@@ -68,31 +68,47 @@ export const submissionsApi = {
   },
 
   getWithProfiles: async (): Promise<Submission[]> => {
-    const { data, error } = await supabase
+    // submissions.user_id -> auth.users (not profiles), so we can't FK-join.
+    // Fetch submissions + profiles separately and merge.
+    const { data: subs, error } = await supabase
       .from('submissions')
-      .select(`
-        *,
-        profiles!submissions_user_id_fkey (full_name)
-      `)
+      .select('*')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
+    if (!subs || subs.length === 0) return [];
 
-    return (data ?? []).map((s: any) => ({
+    const userIds = [...new Set(subs.map((s) => s.user_id))];
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('user_id, full_name')
+      .in('user_id', userIds);
+
+    const nameMap = new Map((profiles ?? []).map((p) => [p.user_id, p.full_name]));
+
+    return subs.map((s) => ({
       ...s,
-      supplier_name: s.profiles?.full_name ?? 'Unknown',
-    }));
+      supplier_name: nameMap.get(s.user_id) ?? 'Unknown',
+    })) as Submission[];
   },
 
   getById: async (id: string): Promise<Submission | null> => {
     const { data, error } = await supabase
       .from('submissions')
-      .select(`*, profiles!submissions_user_id_fkey (full_name)`)
+      .select('*')
       .eq('id', id)
       .single();
 
     if (error) return null;
-    return { ...data, supplier_name: (data as any).profiles?.full_name ?? 'Unknown' } as Submission;
+
+    // Fetch supplier name separately
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('user_id', data.user_id)
+      .single();
+
+    return { ...data, supplier_name: profile?.full_name ?? 'Unknown' } as Submission;
   },
 
   updateStatus: async (id: string, status: 'approved' | 'rejected', revisionNotes?: string) => {
