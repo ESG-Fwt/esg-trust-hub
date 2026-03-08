@@ -127,33 +127,35 @@ const SupplierHistory = () => {
                       const cfg = statusConfig[sub.status] ?? statusConfig.pending;
                       const Icon = cfg.icon;
                       return (
-                        <TableRow key={sub.id}>
-                          <TableCell className="font-medium">{format(new Date(sub.created_at), 'MMM d, yyyy')}</TableCell>
-                          <TableCell className="text-right font-mono text-sm">{Number(sub.electricity).toLocaleString()}</TableCell>
-                          <TableCell className="text-right font-mono text-sm">{Number(sub.gas).toLocaleString()}</TableCell>
-                          <TableCell className="text-right font-mono text-sm">{Number(sub.fuel).toLocaleString()}</TableCell>
-                          <TableCell className="text-right font-mono text-sm">{Number(sub.waste).toLocaleString()}</TableCell>
-                          <TableCell className="text-right font-mono text-sm font-semibold">{Number(sub.total_emissions).toFixed(2)}</TableCell>
-                          <TableCell>
-                            <Badge variant={cfg.variant} className="gap-1">
-                              <Icon className="w-3 h-3" />
-                              {t(cfg.labelKey)}
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                        {sub.status === 'rejected' && sub.revision_notes && (
-                          <TableRow key={`${sub.id}-notes`}>
-                            <TableCell colSpan={7} className="bg-destructive/5 border-l-2 border-destructive/30">
-                              <div className="flex items-start gap-2 py-1">
-                                <MessageSquare className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
-                                <div>
-                                  <p className="text-xs font-medium text-destructive">{t('history.revisionFeedback')}</p>
-                                  <p className="text-sm text-foreground mt-0.5">{sub.revision_notes}</p>
-                                </div>
-                              </div>
+                        <>
+                          <TableRow key={sub.id}>
+                            <TableCell className="font-medium">{format(new Date(sub.created_at), 'MMM d, yyyy')}</TableCell>
+                            <TableCell className="text-right font-mono text-sm">{Number(sub.electricity).toLocaleString()}</TableCell>
+                            <TableCell className="text-right font-mono text-sm">{Number(sub.gas).toLocaleString()}</TableCell>
+                            <TableCell className="text-right font-mono text-sm">{Number(sub.fuel).toLocaleString()}</TableCell>
+                            <TableCell className="text-right font-mono text-sm">{Number(sub.waste).toLocaleString()}</TableCell>
+                            <TableCell className="text-right font-mono text-sm font-semibold">{Number(sub.total_emissions).toFixed(2)}</TableCell>
+                            <TableCell>
+                              <Badge variant={cfg.variant} className="gap-1">
+                                <Icon className="w-3 h-3" />
+                                {t(cfg.labelKey)}
+                              </Badge>
                             </TableCell>
                           </TableRow>
-                        )}
+                          {sub.status === 'rejected' && sub.revision_notes && (
+                            <TableRow key={`${sub.id}-notes`}>
+                              <TableCell colSpan={7} className="bg-destructive/5 border-l-2 border-destructive/30">
+                                <div className="flex items-start gap-2 py-1">
+                                  <MessageSquare className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+                                  <div>
+                                    <p className="text-xs font-medium text-destructive">{t('history.revisionFeedback')}</p>
+                                    <p className="text-sm text-foreground mt-0.5">{sub.revision_notes}</p>
+                                  </div>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </>
                       );
                     })}
                   </TableBody>
