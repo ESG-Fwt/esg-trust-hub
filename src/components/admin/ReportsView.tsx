@@ -77,6 +77,85 @@ const ReportsView = () => {
     toast({ title: `${fw.name} ${t('reports.exported')}` });
   };
 
+  const handleExportAuditTrail = async () => {
+    const approved = submissions?.filter((s) => s.status === 'approved') ?? [];
+    if (approved.length === 0) {
+      toast({ title: t('reports.auditNoApproved'), variant: 'destructive' });
+      return;
+    }
+
+    setIsExportingAudit(true);
+    toast({ title: t('reports.auditExporting') });
+
+    try {
+      const zip = new JSZip();
+
+      // 1. Generate CSV of approved data with emission factor references
+      const { data: factors } = await supabase.from('emission_factors').select('source, co2_multiplier, source_reference, reference_year');
+      const factorMap = new Map((factors ?? []).map((f) => [f.source, f]));
+
+      const csvHeaders = [
+        'Submission ID', 'Date', 'Supplier', 'Period Start', 'Period End',
+        'Electricity (kWh)', 'Gas (m³)', 'Fuel (L)', 'Waste (kg)', 'Water (m³)',
+        'Total CO₂e (kg)', 'Audit Hash', 'Verified At',
+      ];
+      const csvRows = approved.map((s) => [
+        s.id,
+        new Date(s.created_at).toISOString(),
+        s.supplier_name ?? 'Unknown',
+        s.period_start ?? '',
+        s.period_end ?? '',
+        s.electricity,
+        s.gas,
+        s.fuel,
+        s.waste,
+        s.water,
+        s.total_emissions,
+        s.audit_hash ?? '',
+        s.verified_at ?? '',
+      ]);
+      const csv = [csvHeaders.join(','), ...csvRows.map((r) => r.join(','))].join('\n');
+      zip.file('approved-submissions.csv', csv);
+
+      // 2. Add emission factor reference sheet
+      const efHeaders = ['Source', 'Unit', 'kg CO₂e Multiplier', 'Reference', 'Year'];
+      const efRows = (factors ?? []).map((f) => [
+        f.source, '', String(f.co2_multiplier), f.source_reference ?? '', String(f.reference_year ?? ''),
+      ]);
+      const efCsv = [efHeaders.join(','), ...efRows.map((r) => r.join(','))].join('\n');
+      zip.file('emission-factors.csv', efCsv);
+
+      // 3. Download PDF evidence files into an "evidence/" folder
+      const evidenceFolder = zip.folder('evidence');
+      let downloadedCount = 0;
+      for (const s of approved) {
+        if (!s.file_url) continue;
+        try {
+          const { data } = await supabase.storage.from('submissions').download(s.file_url);
+          if (data) {
+            const fileName = s.file_url.split('/').pop() ?? `evidence-${s.id}`;
+            evidenceFolder!.file(fileName, data);
+            downloadedCount++;
+          }
+        } catch {
+          // Skip files that fail to download
+        }
+      }
+
+      // 4. Generate the ZIP and trigger download
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const dateStr = new Date().toISOString().slice(0, 10);
+      saveAs(blob, `CSRD-Audit-Trail-${dateStr}.zip`);
+
+      toast({ title: t('reports.auditExported') });
+    } catch (e) {
+      console.error('Audit export failed:', e);
+      toast({ title: 'Export failed', variant: 'destructive' });
+    } finally {
+      setIsExportingAudit(false);
+    }
+  };
+
   const approvedCount = submissions?.filter((s) => s.status === 'approved').length ?? 0;
   const totalCount = submissions?.length ?? 0;
   const complianceRate = totalCount > 0 ? Math.round((approvedCount / totalCount) * 100) : 0;
