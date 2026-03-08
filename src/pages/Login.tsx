@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Leaf, Building2, Users, ArrowRight, Lock, Mail, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -266,13 +266,20 @@ const Login = () => {
             </Button>
           </div>
 
-          <p className="text-center text-sm text-muted-foreground">
-            {isSignup ? (
-              <>Already have an account? <button type="button" onClick={() => setIsSignup(false)} className="text-primary font-medium hover:underline">Sign in</button></>
-            ) : (
-              <>Don't have an account? <button type="button" onClick={() => setIsSignup(true)} className="text-primary font-medium hover:underline">Create one</button></>
+          <div className="text-center space-y-2">
+            {!isSignup && (
+              <p className="text-sm">
+                <Link to="/forgot-password" className="text-muted-foreground hover:text-primary hover:underline">Forgot your password?</Link>
+              </p>
             )}
-          </p>
+            <p className="text-sm text-muted-foreground">
+              {isSignup ? (
+                <>Already have an account? <button type="button" onClick={() => setIsSignup(false)} className="text-primary font-medium hover:underline">Sign in</button></>
+              ) : (
+                <>Don't have an account? <button type="button" onClick={() => setIsSignup(true)} className="text-primary font-medium hover:underline">Create one</button></>
+              )}
+            </p>
+          </div>
         </motion.div>
       </div>
     </div>
