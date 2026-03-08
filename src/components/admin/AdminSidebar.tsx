@@ -1,4 +1,4 @@
-import { Leaf, LayoutDashboard, FileText, Building2, Users, Settings, LogOut, ChevronDown } from 'lucide-react';
+import { Leaf, LayoutDashboard, FileText, Building2, Users, Shield, LogOut } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
@@ -15,6 +15,7 @@ const navItemKeys = [
   { key: 'nav.submissions', url: '/admin/submissions', icon: FileText },
   { key: 'nav.organizations', url: '/admin/organizations', icon: Building2 },
   { key: 'nav.users', url: '/admin/users', icon: Users },
+  { key: 'nav.auditTrail', url: '/admin/audit', icon: Shield },
 ];
 
 export function AdminSidebar() {
