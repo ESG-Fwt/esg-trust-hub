@@ -10,7 +10,7 @@ const SubmissionSuccess = () => {
 
   const handleNewSubmission = () => {
     resetWizard();
-    navigate('/submission/new');
+    navigate('/supplier/submit');
   };
 
   return (
@@ -49,9 +49,9 @@ const SubmissionSuccess = () => {
             <ArrowRight className="w-5 h-5 mr-2" />
             New Submission
           </Button>
-          <Button variant="outline" onClick={() => navigate('/login')} className="w-full h-12">
+          <Button variant="outline" onClick={() => navigate('/supplier/history')} className="w-full h-12">
             <Home className="w-5 h-5 mr-2" />
-            Back to Home
+            View My Submissions
           </Button>
         </div>
       </motion.div>
