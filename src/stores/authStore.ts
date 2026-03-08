@@ -85,23 +85,12 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   },
 
   signup: async (email: string, password: string, fullName: string, role: UserRole) => {
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName } },
+      options: { data: { full_name: fullName, role } },
     });
     if (error) throw error;
-
-    // Update the profile name and role if user was created
-    if (data.user) {
-      await Promise.all([
-        supabase.from('profiles').update({ full_name: fullName }).eq('user_id', data.user.id),
-        // Update role if not supplier (supplier is default from trigger)
-        ...(role === 'manager' ? [
-          supabase.from('user_roles').update({ role: 'manager' }).eq('user_id', data.user.id),
-        ] : []),
-      ]);
-    }
   },
 
   logout: async () => {
