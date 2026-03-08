@@ -1,4 +1,4 @@
-import { FilePlus, History, User, LogOut } from 'lucide-react';
+import { FilePlus, History, User, LogOut, ClipboardList, Share2 } from 'lucide-react';
 import logoImg from '@/assets/esg-chain-logo.png';
 import { NavLink } from '@/components/NavLink';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -14,6 +14,8 @@ import { Button } from '@/components/ui/button';
 const navItemKeys = [
   { key: 'nav.newSubmission', url: '/supplier/submit', icon: FilePlus },
   { key: 'nav.mySubmissions', url: '/supplier/history', icon: History },
+  { key: 'nav.esgProfile', url: '/supplier/esg-profile', icon: ClipboardList },
+  { key: 'nav.shareProfile', url: '/supplier/share', icon: Share2 },
   { key: 'nav.profile', url: '/supplier/profile', icon: User },
 ];
 
