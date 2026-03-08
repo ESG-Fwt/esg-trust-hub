@@ -4,11 +4,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { submissionsApi } from '@/lib/submissions';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft, FileText, Download, Shield, CheckCircle, RotateCcw,
-  Zap, Flame, Droplets, Trash2, Droplet, Hash, Calendar, User, Loader2,
+  Zap, Flame, Droplets, Trash2, Droplet, Hash, Calendar, User, Loader2, PackageCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,6 +19,8 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
 import { useLanguage } from '@/contexts/LanguageContext';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 
 const AdminReviewSubmission = () => {
   const { id } = useParams<{ id: string }>();
