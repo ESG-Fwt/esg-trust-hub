@@ -25,7 +25,7 @@ const Login = () => {
 
   useEffect(() => {
     if (isAuthenticated && role) {
-      navigate(role === 'manager' ? '/admin/dashboard' : '/submission/new');
+      navigate(role === 'manager' ? '/admin/dashboard' : '/supplier/submit');
     }
   }, [isAuthenticated, role, navigate]);
 
