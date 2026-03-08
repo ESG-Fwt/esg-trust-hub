@@ -25,16 +25,55 @@ export interface Submission {
   supplier_company?: string;
 }
 
+/** Fetch emission factors from the database, with hardcoded fallback. */
+const getEmissionFactors = async (): Promise<Record<string, number>> => {
+  const defaults: Record<string, number> = {
+    electricity: 0.5,
+    gas: 2.0,
+    fuel: 2.5,
+    waste: 0.3,
+    water: 0.1,
+  };
+
+  try {
+    const { data, error } = await supabase
+      .from('emission_factors')
+      .select('source, co2_multiplier');
+
+    if (error || !data || data.length === 0) return defaults;
+
+    const factors: Record<string, number> = { ...defaults };
+    for (const row of data) {
+      factors[row.source] = Number(row.co2_multiplier);
+    }
+    return factors;
+  } catch {
+    return defaults;
+  }
+};
+
+/** Calculate total CO2e from energy data and factor map. */
+export const calculateEmissions = (data: EnergyData, factors: Record<string, number>): number => {
+  return Math.round(
+    data.electricity * (factors.electricity ?? 0.5) +
+    data.gas * (factors.gas ?? 2.0) +
+    data.fuel * (factors.fuel ?? 2.5) +
+    data.waste * (factors.waste ?? 0.3) +
+    data.water * (factors.water ?? 0.1)
+  );
+};
+
 export const submissionsApi = {
   submit: async (data: EnergyData, fileUrl?: string, periodStart?: string, periodEnd?: string) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Not authenticated');
 
-    const profile = await supabase.from('profiles').select('organization_id').eq('user_id', user.id).single();
+    const [profile, factors] = await Promise.all([
+      supabase.from('profiles').select('organization_id').eq('user_id', user.id).single(),
+      getEmissionFactors(),
+    ]);
 
-    const totalEmissions = Math.round(
-      data.electricity * 0.5 + data.gas * 2.0 + data.fuel * 2.5 + data.waste * 0.3 + data.water * 0.1
-    );
+    const totalEmissions = calculateEmissions(data, factors);
 
     const { data: submission, error } = await supabase.from('submissions').insert({
       user_id: user.id,
