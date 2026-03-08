@@ -59,7 +59,7 @@ const ReportsView = () => {
       fw.description,
       s.supplier_name ?? 'Unknown',
       new Date(s.created_at).toLocaleDateString(),
-      ...fw.fields.map((f) => String((s as Record<string, unknown>)[f] ?? 0)),
+      ...fw.fields.map((f) => String((s as unknown as Record<string, unknown>)[f] ?? 0)),
       String(s.total_emissions),
       s.status,
     ]);
