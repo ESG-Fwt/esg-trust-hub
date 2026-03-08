@@ -94,6 +94,7 @@ const translations: Record<Language, Record<string, string>> = {
     'history.statusPending': 'Pending',
     'history.statusApproved': 'Approved',
     'history.statusRejected': 'Rejected',
+    'history.revisionFeedback': 'Manager Feedback',
     // Supplier Profile
     'profile.title': 'Profile',
     'profile.subtitle': 'Manage your account details',
