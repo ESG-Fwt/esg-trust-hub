@@ -133,6 +133,50 @@ export type Database = {
         }
         Relationships: []
       }
+      esg_share_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          label: string
+          organization_id: string | null
+          token: string
+          user_id: string
+          view_count: number
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string
+          organization_id?: string | null
+          token?: string
+          user_id: string
+          view_count?: number
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string
+          organization_id?: string | null
+          token?: string
+          user_id?: string
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "esg_share_tokens_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           created_at: string
@@ -312,6 +356,168 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      vsme_questionnaires: {
+        Row: {
+          board_esg_oversight: boolean
+          created_at: string
+          employee_turnover_percent: number | null
+          female_employees: number
+          gender_pay_gap_percent: number | null
+          governance_notes: string | null
+          has_anti_corruption_policy: boolean
+          has_code_of_conduct: boolean
+          has_sustainability_officer: boolean
+          has_whistleblower_channel: boolean
+          health_safety_incidents: number
+          id: string
+          male_employees: number
+          organization_id: string | null
+          reporting_year: number
+          status: string
+          total_employees: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          board_esg_oversight?: boolean
+          created_at?: string
+          employee_turnover_percent?: number | null
+          female_employees?: number
+          gender_pay_gap_percent?: number | null
+          governance_notes?: string | null
+          has_anti_corruption_policy?: boolean
+          has_code_of_conduct?: boolean
+          has_sustainability_officer?: boolean
+          has_whistleblower_channel?: boolean
+          health_safety_incidents?: number
+          id?: string
+          male_employees?: number
+          organization_id?: string | null
+          reporting_year?: number
+          status?: string
+          total_employees?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          board_esg_oversight?: boolean
+          created_at?: string
+          employee_turnover_percent?: number | null
+          female_employees?: number
+          gender_pay_gap_percent?: number | null
+          governance_notes?: string | null
+          has_anti_corruption_policy?: boolean
+          has_code_of_conduct?: boolean
+          has_sustainability_officer?: boolean
+          has_whistleblower_channel?: boolean
+          health_safety_incidents?: number
+          id?: string
+          male_employees?: number
+          organization_id?: string | null
+          reporting_year?: number
+          status?: string
+          total_employees?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vsme_questionnaires_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      webhook_endpoints: {
+        Row: {
+          created_at: string
+          created_by: string
+          events: string[]
+          id: string
+          is_active: boolean
+          label: string
+          last_status_code: number | null
+          last_triggered_at: string | null
+          organization_id: string | null
+          secret: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          events?: string[]
+          id?: string
+          is_active?: boolean
+          label?: string
+          last_status_code?: number | null
+          last_triggered_at?: string | null
+          organization_id?: string | null
+          secret?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          events?: string[]
+          id?: string
+          is_active?: boolean
+          label?: string
+          last_status_code?: number | null
+          last_triggered_at?: string | null
+          organization_id?: string | null
+          secret?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_endpoints_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      webhook_logs: {
+        Row: {
+          created_at: string
+          endpoint_id: string | null
+          event: string
+          id: string
+          payload: Json
+          response_body: string | null
+          status_code: number | null
+        }
+        Insert: {
+          created_at?: string
+          endpoint_id?: string | null
+          event: string
+          id?: string
+          payload?: Json
+          response_body?: string | null
+          status_code?: number | null
+        }
+        Update: {
+          created_at?: string
+          endpoint_id?: string | null
+          event?: string
+          id?: string
+          payload?: Json
+          response_body?: string | null
+          status_code?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_logs_endpoint_id_fkey"
+            columns: ["endpoint_id"]
+            isOneToOne: false
+            referencedRelation: "webhook_endpoints"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
