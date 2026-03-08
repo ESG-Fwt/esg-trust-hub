@@ -11,6 +11,7 @@ import { lovable } from '@/integrations/lovable/index';
 import { toast } from 'sonner';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { LanguageToggle } from '@/components/LanguageToggle';
+import { EuSovereigntyBadge } from '@/components/EuSovereigntyBadge';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const Login = () => {
@@ -300,6 +301,9 @@ const Login = () => {
                 <>{t('auth.noAccount')} <button type="button" onClick={() => setIsSignup(true)} className="text-primary font-medium hover:underline">{t('auth.createOne')}</button></>
               )}
             </p>
+          </div>
+          <div className="mt-4 flex justify-center">
+            <EuSovereigntyBadge />
           </div>
         </motion.div>
       </div>

@@ -272,6 +272,13 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.auditTrail': 'Audit Trail',
     'adminSub.exportCSV': 'Export CSV',
     'adminSub.exported': 'CSV exported successfully',
+    // Audit Package
+    'adminReview.exportAuditPackage': 'Export Audit Package',
+    'adminReview.auditExported': 'Audit package downloaded',
+    'adminReview.auditExportFailed': 'Failed to export audit package',
+    // EU Sovereignty
+    'eu.badge': 'EU Data Sovereignty',
+    'eu.badgeDesc': 'All data hosted on European servers. GDPR compliant.',
     // Feedback
     'history.actionRequired': 'Action Required',
     'history.submissionNeedsRevision': 'submission needs revision',
@@ -595,6 +602,13 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.auditTrail': 'Traccia di Audit',
     'adminSub.exportCSV': 'Esporta CSV',
     'adminSub.exported': 'CSV esportato con successo',
+    // Audit Package
+    'adminReview.exportAuditPackage': 'Esporta Pacchetto Audit',
+    'adminReview.auditExported': 'Pacchetto audit scaricato',
+    'adminReview.auditExportFailed': 'Errore nell\'esportazione del pacchetto audit',
+    // EU Sovereignty
+    'eu.badge': 'Sovranità Dati UE',
+    'eu.badgeDesc': 'Tutti i dati ospitati su server europei. Conforme al GDPR.',
     // Feedback
     'history.actionRequired': 'Azione Richiesta',
     'history.submissionNeedsRevision': 'invio necessita revisione',
