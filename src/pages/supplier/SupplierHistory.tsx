@@ -5,7 +5,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { FileText, TrendingUp, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { FileText, TrendingUp, Clock, CheckCircle2, XCircle, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -141,6 +141,19 @@ const SupplierHistory = () => {
                             </Badge>
                           </TableCell>
                         </TableRow>
+                        {sub.status === 'rejected' && sub.revision_notes && (
+                          <TableRow key={`${sub.id}-notes`}>
+                            <TableCell colSpan={7} className="bg-destructive/5 border-l-2 border-destructive/30">
+                              <div className="flex items-start gap-2 py-1">
+                                <MessageSquare className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+                                <div>
+                                  <p className="text-xs font-medium text-destructive">{t('history.revisionFeedback')}</p>
+                                  <p className="text-sm text-foreground mt-0.5">{sub.revision_notes}</p>
+                                </div>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
                       );
                     })}
                   </TableBody>
