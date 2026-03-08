@@ -1,9 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB limit for base64 in edge functions
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -22,10 +25,16 @@ serve(async (req) => {
       });
     }
 
-    // Convert file to base64 for vision model
+    if (file.size > MAX_FILE_SIZE) {
+      return new Response(JSON.stringify({ error: "File too large. Maximum 4MB for AI extraction." }), {
+        status: 413,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const arrayBuffer = await file.arrayBuffer();
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-    const mimeType = file.type || "application/pdf";
+    const base64 = base64Encode(new Uint8Array(arrayBuffer));
+    const mimeType = file.type || "image/png";
 
     const systemPrompt = `You are an ESG energy data extraction specialist. Extract energy consumption data from the uploaded document (invoice, utility bill, report, etc.).
 
@@ -90,21 +99,18 @@ If a field is not found in the document, set it to 0. Look for totals, consumpti
     if (!response.ok) {
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again shortly." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
         return new Response(JSON.stringify({ error: "AI usage limit reached." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       const t = await response.text();
       console.error("AI gateway error:", response.status, t);
       return new Response(JSON.stringify({ error: "AI extraction failed" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -113,8 +119,7 @@ If a field is not found in the document, set it to 0. Look for totals, consumpti
 
     if (!toolCall) {
       return new Response(JSON.stringify({ error: "AI could not extract data from this document" }), {
-        status: 422,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -136,8 +141,7 @@ If a field is not found in the document, set it to 0. Look for totals, consumpti
   } catch (e) {
     console.error("extract-energy error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
