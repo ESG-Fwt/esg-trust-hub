@@ -5,11 +5,12 @@ export interface Submission {
   id: string;
   created_at: string;
   user_id: string;
-  organization_id: string;
+  organization_id: string | null;
   electricity: number;
   gas: number;
   fuel: number;
   waste: number;
+  water: number;
   total_emissions: number;
   status: 'pending' | 'approved' | 'rejected';
   file_url: string | null;
@@ -17,20 +18,22 @@ export interface Submission {
   verified_at: string | null;
   reviewed_by: string | null;
   revision_notes: string | null;
+  period_start: string | null;
+  period_end: string | null;
   // Joined data
   supplier_name?: string;
   supplier_company?: string;
 }
 
 export const submissionsApi = {
-  submit: async (data: EnergyData, fileUrl?: string) => {
+  submit: async (data: EnergyData, fileUrl?: string, periodStart?: string, periodEnd?: string) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Not authenticated');
 
     const profile = await supabase.from('profiles').select('organization_id').eq('user_id', user.id).single();
 
     const totalEmissions = Math.round(
-      data.electricity * 0.5 + data.gas * 2.0 + data.fuel * 2.5 + data.waste * 0.3
+      data.electricity * 0.5 + data.gas * 2.0 + data.fuel * 2.5 + data.waste * 0.3 + data.water * 0.1
     );
 
     const { data: submission, error } = await supabase.from('submissions').insert({
@@ -40,13 +43,15 @@ export const submissionsApi = {
       gas: data.gas,
       fuel: data.fuel,
       waste: data.waste,
+      water: data.water,
       total_emissions: totalEmissions,
       file_url: fileUrl ?? null,
+      period_start: periodStart ?? null,
+      period_end: periodEnd ?? null,
     }).select().single();
 
     if (error) throw error;
 
-    // Create audit log entry
     await supabase.from('audit_logs').insert({
       submission_id: submission.id,
       action: 'CREATED',
@@ -68,8 +73,6 @@ export const submissionsApi = {
   },
 
   getWithProfiles: async (): Promise<Submission[]> => {
-    // submissions.user_id -> auth.users (not profiles), so we can't FK-join.
-    // Fetch submissions + profiles separately and merge.
     const { data: subs, error } = await supabase
       .from('submissions')
       .select('*')
@@ -101,7 +104,6 @@ export const submissionsApi = {
 
     if (error) return null;
 
-    // Fetch supplier name separately
     const { data: profile } = await supabase
       .from('profiles')
       .select('full_name')
@@ -129,7 +131,6 @@ export const submissionsApi = {
     const { error } = await supabase.from('submissions').update(updates).eq('id', id);
     if (error) throw error;
 
-    // Create audit log
     await supabase.from('audit_logs').insert({
       submission_id: id,
       action: status === 'approved' ? 'APPROVED' : 'REVISION_REQUESTED',
@@ -158,6 +159,16 @@ export const submissionsApi = {
     };
   },
 
+  getAuditLogs: async () => {
+    const { data, error } = await supabase
+      .from('audit_logs')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data ?? [];
+  },
+
   uploadFile: async (file: File) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Not authenticated');
@@ -167,5 +178,23 @@ export const submissionsApi = {
     if (error) throw error;
 
     return filePath;
+  },
+
+  exportCSV: (submissions: Submission[]): string => {
+    const headers = ['Date', 'Supplier', 'Electricity (kWh)', 'Gas (m³)', 'Fuel (L)', 'Waste (kg)', 'Water (m³)', 'Total CO₂e (kg)', 'Status', 'Period Start', 'Period End'];
+    const rows = submissions.map(s => [
+      new Date(s.created_at).toLocaleDateString(),
+      s.supplier_name ?? 'Unknown',
+      s.electricity,
+      s.gas,
+      s.fuel,
+      s.waste,
+      s.water,
+      s.total_emissions,
+      s.status,
+      s.period_start ?? '',
+      s.period_end ?? '',
+    ]);
+    return [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
   },
 };

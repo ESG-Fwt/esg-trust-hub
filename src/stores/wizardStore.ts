@@ -6,6 +6,7 @@ export interface EnergyData {
   gas: number;
   fuel: number;
   waste: number;
+  water: number;
 }
 
 interface WizardState {
@@ -18,6 +19,8 @@ interface WizardState {
   isAIProcessing: boolean;
   isSubmitting: boolean;
   submissionComplete: boolean;
+  periodStart: string | null;
+  periodEnd: string | null;
 
   // Actions
   setStep: (step: number) => void;
@@ -31,6 +34,8 @@ interface WizardState {
   setIsAIProcessing: (processing: boolean) => void;
   setIsSubmitting: (submitting: boolean) => void;
   setSubmissionComplete: (complete: boolean) => void;
+  setPeriodStart: (date: string | null) => void;
+  setPeriodEnd: (date: string | null) => void;
   resetWizard: () => void;
 }
 
@@ -39,6 +44,7 @@ const initialEnergyData: EnergyData = {
   gas: 0,
   fuel: 0,
   waste: 0,
+  water: 0,
 };
 
 export const useWizardStore = create<WizardState>()(
@@ -53,6 +59,8 @@ export const useWizardStore = create<WizardState>()(
       isAIProcessing: false,
       isSubmitting: false,
       submissionComplete: false,
+      periodStart: null,
+      periodEnd: null,
 
       setStep: (step) => set({ currentStep: step }),
       nextStep: () => set((state) => ({ currentStep: Math.min(state.currentStep + 1, 3) })),
@@ -66,6 +74,8 @@ export const useWizardStore = create<WizardState>()(
       setIsAIProcessing: (processing) => set({ isAIProcessing: processing }),
       setIsSubmitting: (submitting) => set({ isSubmitting: submitting }),
       setSubmissionComplete: (complete) => set({ submissionComplete: complete }),
+      setPeriodStart: (date) => set({ periodStart: date }),
+      setPeriodEnd: (date) => set({ periodEnd: date }),
       resetWizard: () =>
         set({
           currentStep: 1,
@@ -77,6 +87,8 @@ export const useWizardStore = create<WizardState>()(
           isAIProcessing: false,
           isSubmitting: false,
           submissionComplete: false,
+          periodStart: null,
+          periodEnd: null,
         }),
     }),
     {

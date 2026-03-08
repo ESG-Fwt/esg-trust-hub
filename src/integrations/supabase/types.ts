@@ -115,6 +115,8 @@ export type Database = {
           gas: number
           id: string
           organization_id: string | null
+          period_end: string | null
+          period_start: string | null
           reviewed_by: string | null
           revision_notes: string | null
           status: string
@@ -123,6 +125,7 @@ export type Database = {
           user_id: string
           verified_at: string | null
           waste: number
+          water: number
         }
         Insert: {
           audit_hash?: string | null
@@ -133,6 +136,8 @@ export type Database = {
           gas?: number
           id?: string
           organization_id?: string | null
+          period_end?: string | null
+          period_start?: string | null
           reviewed_by?: string | null
           revision_notes?: string | null
           status?: string
@@ -141,6 +146,7 @@ export type Database = {
           user_id: string
           verified_at?: string | null
           waste?: number
+          water?: number
         }
         Update: {
           audit_hash?: string | null
@@ -151,6 +157,8 @@ export type Database = {
           gas?: number
           id?: string
           organization_id?: string | null
+          period_end?: string | null
+          period_start?: string | null
           reviewed_by?: string | null
           revision_notes?: string | null
           status?: string
@@ -159,6 +167,7 @@ export type Database = {
           user_id?: string
           verified_at?: string | null
           waste?: number
+          water?: number
         }
         Relationships: [
           {

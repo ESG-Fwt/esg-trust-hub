@@ -19,6 +19,7 @@ import AdminSubmissions from "./pages/AdminSubmissions";
 import AdminReviewSubmission from "./pages/AdminReviewSubmission";
 import AdminOrganizations from "./pages/AdminOrganizations";
 import AdminUsers from "./pages/AdminUsers";
+import AdminAuditTrail from "./pages/AdminAuditTrail";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -80,6 +81,9 @@ const AppRoutes = () => {
       } />
       <Route path="/admin/users" element={
         <ProtectedRoute requiredRole="manager"><AdminUsers /></ProtectedRoute>
+      } />
+      <Route path="/admin/audit" element={
+        <ProtectedRoute requiredRole="manager"><AdminAuditTrail /></ProtectedRoute>
       } />
 
       <Route path="*" element={<NotFound />} />

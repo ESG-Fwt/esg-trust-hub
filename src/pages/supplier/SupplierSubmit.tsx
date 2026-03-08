@@ -7,6 +7,7 @@ import EnergyDataForm from '@/components/wizard/EnergyDataForm';
 import SmartUpload from '@/components/wizard/SmartUpload';
 import ReviewSubmit from '@/components/wizard/ReviewSubmit';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { WelcomeModal } from '@/components/supplier/WelcomeModal';
 
 const SupplierSubmit = () => {
   const { currentStep, submissionMethod } = useWizardStore();
@@ -33,6 +34,7 @@ const SupplierSubmit = () => {
 
   return (
     <SupplierLayout>
+      <WelcomeModal />
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-foreground">{t('submit.title')}</h1>

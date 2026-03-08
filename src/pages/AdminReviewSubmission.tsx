@@ -110,7 +110,7 @@ const AdminReviewSubmission = () => {
     { label: t('energy.naturalGas'), value: Number(submission.gas), unit: 'm³', icon: Flame, iconColor: 'text-orange-500', bgColor: 'bg-orange-50' },
     { label: t('energy.fuel'), value: Number(submission.fuel), unit: 'L', icon: Droplets, iconColor: 'text-blue-500', bgColor: 'bg-blue-50' },
     { label: t('energy.waste'), value: Number(submission.waste), unit: 'kg', icon: Trash2, iconColor: 'text-muted-foreground', bgColor: 'bg-muted' },
-    { label: t('energy.water'), value: 0, unit: 'm³', icon: Droplet, iconColor: 'text-cyan-500', bgColor: 'bg-cyan-50' },
+    { label: t('energy.water'), value: Number(submission.water), unit: 'm³', icon: Droplet, iconColor: 'text-cyan-500', bgColor: 'bg-cyan-50' },
   ];
 
   return (
@@ -138,6 +138,11 @@ const AdminReviewSubmission = () => {
                 <Calendar className="w-3 h-3" />
                 {new Date(submission.created_at).toLocaleDateString()}
               </span>
+              {submission.period_start && submission.period_end && (
+                <span className="flex items-center gap-1">
+                  {t('energy.period')}: {submission.period_start} → {submission.period_end}
+                </span>
+              )}
               <span className="flex items-center gap-1"><User className="w-3 h-3" />{submission.supplier_name ?? t('common.unknown')}</span>
             </div>
           </div>
@@ -257,9 +262,7 @@ const AdminReviewSubmission = () => {
                 <div className="w-full h-full min-h-[500px] bg-muted/50 rounded-lg border-2 border-dashed border-border overflow-hidden">
                   {filePreviewUrl ? (
                     submission.file_url?.endsWith('.pdf') ? (
-                      <object data={filePreviewUrl} type="application/pdf" className="w-full h-full min-h-[500px]">
-                        <iframe src={filePreviewUrl} className="w-full h-full min-h-[500px]" title="PDF Viewer" />
-                      </object>
+                      <iframe src={filePreviewUrl} className="w-full h-full min-h-[500px]" title="PDF Viewer" />
                     ) : (
                       <img src={filePreviewUrl} alt="Uploaded evidence" className="w-full h-full object-contain p-4" />
                     )

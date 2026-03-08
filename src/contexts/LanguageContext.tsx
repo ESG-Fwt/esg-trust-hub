@@ -247,6 +247,35 @@ const translations: Record<Language, Record<string, string>> = {
     'users.noUsers': 'No users found',
     'users.userUpdated': 'User updated',
     'users.users': 'users',
+    // Audit Trail
+    'audit.title': 'Audit Trail',
+    'audit.subtitle': 'Immutable record of all submission actions',
+    'audit.noLogs': 'No audit logs yet',
+    // Onboarding
+    'onboarding.step1Title': 'Welcome to ESG Chain',
+    'onboarding.step1Desc': 'Your platform for streamlined ESG reporting and compliance. Submit energy data, track emissions, and stay audit-ready.',
+    'onboarding.step2Title': 'Upload or Enter Data',
+    'onboarding.step2Desc': 'Choose Smart Upload to let AI extract data from your utility bills, or enter values manually.',
+    'onboarding.step3Title': 'Track Your Submissions',
+    'onboarding.step3Desc': 'View all your submissions, check approval status, and respond to manager feedback from one dashboard.',
+    'onboarding.step4Title': 'You\'re Ready!',
+    'onboarding.step4Desc': 'Start by creating your first submission. Your ESG manager will review and approve your data.',
+    'onboarding.skip': 'Skip',
+    'onboarding.next': 'Next',
+    'onboarding.getStarted': 'Get Started',
+    // Energy extras
+    'energy.periodStart': 'Period Start',
+    'energy.periodEnd': 'Period End',
+    'energy.period': 'Period',
+    'energy.reportingPeriod': 'Reporting Period',
+    // Admin extras
+    'nav.auditTrail': 'Audit Trail',
+    'adminSub.exportCSV': 'Export CSV',
+    'adminSub.exported': 'CSV exported successfully',
+    // Feedback
+    'history.actionRequired': 'Action Required',
+    'history.submissionNeedsRevision': 'submission needs revision',
+    'history.submissionsNeedRevision': 'submissions need revision',
   },
   it: {
     // Nav
@@ -492,6 +521,35 @@ const translations: Record<Language, Record<string, string>> = {
     'users.noUsers': 'Nessun utente trovato',
     'users.userUpdated': 'Utente aggiornato',
     'users.users': 'utenti',
+    // Audit Trail
+    'audit.title': 'Traccia di Audit',
+    'audit.subtitle': 'Registro immutabile di tutte le azioni sugli invii',
+    'audit.noLogs': 'Nessun log di audit ancora',
+    // Onboarding
+    'onboarding.step1Title': 'Benvenuto su ESG Chain',
+    'onboarding.step1Desc': 'La tua piattaforma per report ESG semplificati e conformità. Invia dati energetici, monitora emissioni e resta pronto per gli audit.',
+    'onboarding.step2Title': 'Carica o Inserisci Dati',
+    'onboarding.step2Desc': 'Scegli Caricamento Smart per far estrarre i dati dall\'IA dalle tue bollette, o inserisci i valori manualmente.',
+    'onboarding.step3Title': 'Monitora i Tuoi Invii',
+    'onboarding.step3Desc': 'Visualizza tutti i tuoi invii, controlla lo stato di approvazione e rispondi al feedback del manager da un\'unica dashboard.',
+    'onboarding.step4Title': 'Sei Pronto!',
+    'onboarding.step4Desc': 'Inizia creando il tuo primo invio. Il tuo manager ESG revisionerà e approverà i tuoi dati.',
+    'onboarding.skip': 'Salta',
+    'onboarding.next': 'Avanti',
+    'onboarding.getStarted': 'Inizia',
+    // Energy extras
+    'energy.periodStart': 'Inizio Periodo',
+    'energy.periodEnd': 'Fine Periodo',
+    'energy.period': 'Periodo',
+    'energy.reportingPeriod': 'Periodo di Rendicontazione',
+    // Admin extras
+    'nav.auditTrail': 'Traccia di Audit',
+    'adminSub.exportCSV': 'Esporta CSV',
+    'adminSub.exported': 'CSV esportato con successo',
+    // Feedback
+    'history.actionRequired': 'Azione Richiesta',
+    'history.submissionNeedsRevision': 'invio necessita revisione',
+    'history.submissionsNeedRevision': 'invii necessitano revisione',
   },
 };
 

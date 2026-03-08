@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronRight, Search, Filter } from 'lucide-react';
+import { ChevronRight, Search, Filter, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { submissionsApi, Submission } from '@/lib/submissions';
 import { useQuery } from '@tanstack/react-query';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { toast } from 'sonner';
 
 const SubmissionsView = () => {
   const navigate = useNavigate();
@@ -30,6 +31,22 @@ const SubmissionsView = () => {
     return matchesSearch && matchesStatus;
   });
 
+  const handleExportCSV = () => {
+    if (!filtered || filtered.length === 0) {
+      toast.error(t('adminSub.noSubmissions'));
+      return;
+    }
+    const csv = submissionsApi.exportCSV(filtered);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `esg-submissions-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(t('adminSub.exported'));
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending': return <Badge variant="outline" className="bg-status-pending-bg text-status-pending border-status-pending/30 text-[11px]">{t('dashboard.pending')}</Badge>;
@@ -46,9 +63,14 @@ const SubmissionsView = () => {
           <h1 className="text-2xl font-bold text-foreground">{t('adminSub.title')}</h1>
           <p className="text-muted-foreground text-sm mt-1">{t('adminSub.subtitle')}</p>
         </div>
-        <Badge variant="secondary" className="font-normal text-xs">
-          {submissions?.length ?? 0} {t('common.total')}
-        </Badge>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" size="sm" onClick={handleExportCSV} className="h-8 text-xs">
+            <Download className="w-3.5 h-3.5 mr-1.5" /> {t('adminSub.exportCSV')}
+          </Button>
+          <Badge variant="secondary" className="font-normal text-xs">
+            {submissions?.length ?? 0} {t('common.total')}
+          </Badge>
+        </div>
       </div>
 
       <div className="flex gap-3 flex-wrap">
@@ -80,6 +102,7 @@ const SubmissionsView = () => {
                 <TableHead className="text-xs text-right">{t('energy.electricity')}</TableHead>
                 <TableHead className="text-xs text-right">{t('energy.naturalGas')}</TableHead>
                 <TableHead className="text-xs text-right">{t('energy.fuel')}</TableHead>
+                <TableHead className="text-xs text-right">{t('energy.water')}</TableHead>
                 <TableHead className="text-xs text-right">Total CO₂e</TableHead>
                 <TableHead className="text-xs">{t('common.status')}</TableHead>
                 <TableHead className="text-xs text-right">{t('common.actions')}</TableHead>
@@ -96,6 +119,7 @@ const SubmissionsView = () => {
                   <TableCell className="text-xs text-right font-mono">{Number(sub.electricity).toLocaleString()}</TableCell>
                   <TableCell className="text-xs text-right font-mono">{Number(sub.gas).toLocaleString()}</TableCell>
                   <TableCell className="text-xs text-right font-mono">{Number(sub.fuel).toLocaleString()}</TableCell>
+                  <TableCell className="text-xs text-right font-mono">{Number(sub.water).toLocaleString()}</TableCell>
                   <TableCell className="text-xs text-right font-mono font-medium">{Number(sub.total_emissions).toLocaleString()} kg</TableCell>
                   <TableCell>{getStatusBadge(sub.status)}</TableCell>
                   <TableCell className="text-right">
@@ -107,7 +131,7 @@ const SubmissionsView = () => {
               ))}
               {(!filtered || filtered.length === 0) && (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center text-muted-foreground py-12 text-sm">
+                  <TableCell colSpan={9} className="text-center text-muted-foreground py-12 text-sm">
                     {t('adminSub.noSubmissions')}
                   </TableCell>
                 </TableRow>
