@@ -114,7 +114,7 @@ export type Database = {
           fuel: number
           gas: number
           id: string
-          organization_id: string
+          organization_id: string | null
           reviewed_by: string | null
           status: string
           total_emissions: number
@@ -131,7 +131,7 @@ export type Database = {
           fuel?: number
           gas?: number
           id?: string
-          organization_id: string
+          organization_id?: string | null
           reviewed_by?: string | null
           status?: string
           total_emissions?: number
@@ -148,7 +148,7 @@ export type Database = {
           fuel?: number
           gas?: number
           id?: string
-          organization_id?: string
+          organization_id?: string | null
           reviewed_by?: string | null
           status?: string
           total_emissions?: number
