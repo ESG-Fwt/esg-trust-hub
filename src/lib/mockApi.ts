@@ -110,6 +110,7 @@ export const mockApi = {
           gas: 120,
           fuel: 0,
           waste: 50,
+          water: 0,
         },
       };
     },
