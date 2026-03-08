@@ -57,7 +57,7 @@ describe('submissionsApi.exportCSV', () => {
 });
 
 describe('calculateEmissions (dynamic factors)', () => {
-  const defaultFactors = { electricity: 0.5, gas: 2.0, fuel: 2.5, waste: 0.3, water: 0.1 };
+  const defaultFactors = { electricity: 0.256, gas: 1.93, fuel: 2.51, waste: 0.47, water: 0.149 };
 
   it('calculates total emissions with default factors', () => {
     const data = { electricity: 1000, gas: 500, fuel: 200, waste: 100, water: 50 };

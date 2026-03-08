@@ -28,11 +28,11 @@ export interface Submission {
 /** Fetch emission factors from the database, with hardcoded fallback. */
 const getEmissionFactors = async (): Promise<Record<string, number>> => {
   const defaults: Record<string, number> = {
-    electricity: 0.5,
-    gas: 2.0,
-    fuel: 2.5,
-    waste: 0.3,
-    water: 0.1,
+    electricity: 0.256,
+    gas: 1.93,
+    fuel: 2.51,
+    waste: 0.47,
+    water: 0.149,
   };
 
   try {
