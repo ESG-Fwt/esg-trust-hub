@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SupplierLayout } from '@/components/supplier/SupplierLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
@@ -216,5 +216,4 @@ const SupplierHistory = () => {
   );
 };
 
-import React from 'react';
 export default SupplierHistory;
