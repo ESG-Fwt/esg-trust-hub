@@ -55,16 +55,22 @@ const SmartUpload = () => {
         body: formData,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        if (response.status === 429) throw new Error('Rate limit exceeded.');
-        if (response.status === 402) throw new Error('AI usage limit reached.');
-        if (response.status === 413) throw new Error(t('smart.fileTooLarge'));
-        throw new Error(errorData?.error || 'AI extraction failed');
-      }
-
       const data = await response.json();
-      if (!data?.success) throw new Error(data?.error || 'Could not extract data');
+
+      if (!response.ok || !data?.success) {
+        if (response.status === 429) throw new Error(t('smart.rateLimited'));
+        if (response.status === 402) throw new Error(t('smart.usageLimited'));
+        if (response.status === 413) throw new Error(t('smart.fileTooLarge'));
+
+        const errorCode = data?.error_code;
+        if (errorCode === 'ERROR_INVALID_DOC') {
+          throw new Error(t('smart.errorInvalidDoc'));
+        }
+        if (errorCode === 'ERROR_UNREADABLE') {
+          throw new Error(t('smart.errorUnreadable'));
+        }
+        throw new Error(data?.error || t('smart.failed'));
+      }
 
       setProcessingStage('complete');
       setAIExtractedData(data.data);

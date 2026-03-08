@@ -130,6 +130,10 @@ const translations: Record<Language, Record<string, string>> = {
     'smart.manualInstead': 'Enter data manually instead',
     'smart.fileTooLarge': 'File too large. Maximum 4MB for AI extraction.',
     'smart.pdfOrImage': 'Please upload a PDF or image file',
+    'smart.errorInvalidDoc': 'This does not appear to be a utility bill or energy invoice. Please upload the correct document.',
+    'smart.errorUnreadable': 'The document is too blurry or low-quality to read. Please upload a clearer photo or scan.',
+    'smart.rateLimited': 'Too many requests. Please wait a moment and try again.',
+    'smart.usageLimited': 'AI usage limit reached. Please try again later.',
     // Review & Submit
     'review.title': 'Review & Submit',
     'review.subtitle': 'Verify the extracted data below before submitting',
@@ -370,6 +374,10 @@ const translations: Record<Language, Record<string, string>> = {
     'smart.manualInstead': 'Inserisci i dati manualmente',
     'smart.fileTooLarge': 'File troppo grande. Massimo 4MB per l\'estrazione IA.',
     'smart.pdfOrImage': 'Carica un file PDF o immagine',
+    'smart.errorInvalidDoc': 'Questo documento non sembra essere una bolletta o fattura energetica. Per favore carica il documento corretto.',
+    'smart.errorUnreadable': 'Il documento è troppo sfocato o di bassa qualità per essere letto. Per favore carica una foto o scansione più nitida.',
+    'smart.rateLimited': 'Troppe richieste. Attendi un momento e riprova.',
+    'smart.usageLimited': 'Limite di utilizzo IA raggiunto. Riprova più tardi.',
     // Review & Submit
     'review.title': 'Revisione e Invio',
     'review.subtitle': 'Verifica i dati estratti prima di inviare',
