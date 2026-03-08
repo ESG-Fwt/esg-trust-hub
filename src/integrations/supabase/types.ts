@@ -97,6 +97,36 @@ export type Database = {
           },
         ]
       }
+      emission_factors: {
+        Row: {
+          co2_multiplier: number
+          created_at: string
+          id: string
+          label: string
+          source: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          co2_multiplier: number
+          created_at?: string
+          id?: string
+          label?: string
+          source: string
+          unit: string
+          updated_at?: string
+        }
+        Update: {
+          co2_multiplier?: number
+          created_at?: string
+          id?: string
+          label?: string
+          source?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       organizations: {
         Row: {
           created_at: string
