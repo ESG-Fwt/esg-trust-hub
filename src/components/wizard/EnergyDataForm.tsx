@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Zap, Flame, Droplets, Trash2, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Zap, Flame, Droplets, Trash2, Droplet, ArrowRight, ArrowLeft, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,7 +10,7 @@ import { validateEnergyData } from '@/lib/validationSchemas';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const EnergyDataForm = () => {
-  const { manualData, setManualData, nextStep, prevStep } = useWizardStore();
+  const { manualData, setManualData, periodStart, periodEnd, setPeriodStart, setPeriodEnd, nextStep, prevStep } = useWizardStore();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { t } = useLanguage();
 
@@ -19,10 +19,11 @@ const EnergyDataForm = () => {
     gas: { labelKey: 'energy.naturalGas', unit: 'm³', icon: Flame, color: 'text-orange-500', max: 100000 },
     fuel: { labelKey: 'energy.fuel', unit: 'L', icon: Droplets, color: 'text-blue-500', max: 50000 },
     waste: { labelKey: 'energy.waste', unit: 'kg', icon: Trash2, color: 'text-slate-500', max: 10000 },
+    water: { labelKey: 'energy.water', unit: 'm³', icon: Droplet, color: 'text-cyan-500', max: 100000 },
   } as const;
 
   type FieldKey = keyof typeof FIELD_CONFIG;
-  const fields: FieldKey[] = ['electricity', 'gas', 'fuel', 'waste'];
+  const fields: FieldKey[] = ['electricity', 'gas', 'fuel', 'waste', 'water'];
 
   const validateForm = (): boolean => {
     const result = validateEnergyData(manualData);
@@ -68,6 +69,34 @@ const EnergyDataForm = () => {
       <div className="text-center space-y-2">
         <h2 className="text-2xl font-bold text-foreground">{t('energy.title')}</h2>
         <p className="text-muted-foreground">{t('energy.subtitle')}</p>
+      </div>
+
+      {/* Period Selection */}
+      <div className="grid grid-cols-2 gap-4 p-4 rounded-lg border border-border bg-card">
+        <div>
+          <Label className="text-sm font-medium flex items-center gap-2 mb-2">
+            <Calendar className="w-4 h-4 text-primary" />
+            {t('energy.periodStart')}
+          </Label>
+          <Input
+            type="date"
+            value={periodStart ?? ''}
+            onChange={(e) => setPeriodStart(e.target.value || null)}
+            className="h-10"
+          />
+        </div>
+        <div>
+          <Label className="text-sm font-medium flex items-center gap-2 mb-2">
+            <Calendar className="w-4 h-4 text-primary" />
+            {t('energy.periodEnd')}
+          </Label>
+          <Input
+            type="date"
+            value={periodEnd ?? ''}
+            onChange={(e) => setPeriodEnd(e.target.value || null)}
+            className="h-10"
+          />
+        </div>
       </div>
 
       <div className="grid gap-6">

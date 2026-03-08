@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Zap, Flame, Droplets, Trash2, ArrowLeft, Send, Sparkles, TrendingUp } from 'lucide-react';
+import { Zap, Flame, Droplets, Trash2, Droplet, ArrowLeft, Send, Sparkles, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,6 +17,8 @@ const ReviewSubmit = () => {
     manualData,
     aiExtractedData,
     uploadedFilePath,
+    periodStart,
+    periodEnd,
     prevStep,
     isSubmitting,
     setIsSubmitting,
@@ -28,7 +30,7 @@ const ReviewSubmit = () => {
 
   const calculateCO2e = () => {
     return Math.round(
-      mergedData.electricity * 0.5 + mergedData.gas * 2.0 + mergedData.fuel * 2.5 + mergedData.waste * 0.3
+      mergedData.electricity * 0.5 + mergedData.gas * 2.0 + mergedData.fuel * 2.5 + mergedData.waste * 0.3 + mergedData.water * 0.1
     );
   };
 
@@ -37,12 +39,13 @@ const ReviewSubmit = () => {
     { key: 'gas', labelKey: 'energy.naturalGas', unit: 'm³', icon: Flame, color: 'text-orange-500', bgColor: 'bg-orange-50' },
     { key: 'fuel', labelKey: 'energy.fuel', unit: 'L', icon: Droplets, color: 'text-blue-500', bgColor: 'bg-blue-50' },
     { key: 'waste', labelKey: 'energy.waste', unit: 'kg', icon: Trash2, color: 'text-slate-500', bgColor: 'bg-slate-50' },
+    { key: 'water', labelKey: 'energy.water', unit: 'm³', icon: Droplet, color: 'text-cyan-500', bgColor: 'bg-cyan-50' },
   ];
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      await submissionsApi.submit(mergedData, uploadedFilePath ?? undefined);
+      await submissionsApi.submit(mergedData, uploadedFilePath ?? undefined, periodStart ?? undefined, periodEnd ?? undefined);
       setSubmissionComplete(true);
       toast.success(t('review.success'));
       navigate('/submission/success');
@@ -59,6 +62,12 @@ const ReviewSubmit = () => {
         <h2 className="text-2xl font-bold text-foreground">{t('review.title')}</h2>
         <p className="text-muted-foreground">{t('review.subtitle')}</p>
       </div>
+
+      {(periodStart || periodEnd) && (
+        <div className="text-center text-sm text-muted-foreground">
+          {t('energy.reportingPeriod')}: {periodStart ?? '—'} → {periodEnd ?? '—'}
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2">
         {fields.map(({ key, labelKey, unit, icon: Icon, color, bgColor }, index) => {
