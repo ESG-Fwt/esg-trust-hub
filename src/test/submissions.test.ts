@@ -59,10 +59,10 @@ describe('submissionsApi.exportCSV', () => {
 describe('calculateEmissions (dynamic factors)', () => {
   const defaultFactors = { electricity: 0.256, gas: 1.93, fuel: 2.51, waste: 0.47, water: 0.149 };
 
-  it('calculates total emissions with default factors', () => {
+  it('calculates total emissions with ISPRA/DEFRA factors', () => {
     const data = { electricity: 1000, gas: 500, fuel: 200, waste: 100, water: 50 };
-    // 500 + 1000 + 500 + 30 + 5 = 2035
-    expect(calculateEmissions(data, defaultFactors)).toBe(2035);
+    // 256 + 965 + 502 + 47 + 7.45 = 1777.45 → 1777
+    expect(calculateEmissions(data, defaultFactors)).toBe(1777);
   });
 
   it('handles zero input', () => {
