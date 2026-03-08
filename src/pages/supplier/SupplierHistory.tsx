@@ -5,7 +5,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { FileText, TrendingUp, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { FileText, TrendingUp, Clock, CheckCircle2, XCircle, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -18,6 +18,7 @@ interface Submission {
   total_emissions: number;
   status: string;
   created_at: string;
+  revision_notes: string | null;
 }
 
 const SupplierHistory = () => {
@@ -37,7 +38,7 @@ const SupplierHistory = () => {
     const fetchData = async () => {
       const { data } = await supabase
         .from('submissions')
-        .select('id, electricity, gas, fuel, waste, total_emissions, status, created_at')
+        .select('id, electricity, gas, fuel, waste, total_emissions, status, created_at, revision_notes')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       setSubmissions(data ?? []);
@@ -126,20 +127,35 @@ const SupplierHistory = () => {
                       const cfg = statusConfig[sub.status] ?? statusConfig.pending;
                       const Icon = cfg.icon;
                       return (
-                        <TableRow key={sub.id}>
-                          <TableCell className="font-medium">{format(new Date(sub.created_at), 'MMM d, yyyy')}</TableCell>
-                          <TableCell className="text-right font-mono text-sm">{Number(sub.electricity).toLocaleString()}</TableCell>
-                          <TableCell className="text-right font-mono text-sm">{Number(sub.gas).toLocaleString()}</TableCell>
-                          <TableCell className="text-right font-mono text-sm">{Number(sub.fuel).toLocaleString()}</TableCell>
-                          <TableCell className="text-right font-mono text-sm">{Number(sub.waste).toLocaleString()}</TableCell>
-                          <TableCell className="text-right font-mono text-sm font-semibold">{Number(sub.total_emissions).toFixed(2)}</TableCell>
-                          <TableCell>
-                            <Badge variant={cfg.variant} className="gap-1">
-                              <Icon className="w-3 h-3" />
-                              {t(cfg.labelKey)}
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
+                        <>
+                          <TableRow key={sub.id}>
+                            <TableCell className="font-medium">{format(new Date(sub.created_at), 'MMM d, yyyy')}</TableCell>
+                            <TableCell className="text-right font-mono text-sm">{Number(sub.electricity).toLocaleString()}</TableCell>
+                            <TableCell className="text-right font-mono text-sm">{Number(sub.gas).toLocaleString()}</TableCell>
+                            <TableCell className="text-right font-mono text-sm">{Number(sub.fuel).toLocaleString()}</TableCell>
+                            <TableCell className="text-right font-mono text-sm">{Number(sub.waste).toLocaleString()}</TableCell>
+                            <TableCell className="text-right font-mono text-sm font-semibold">{Number(sub.total_emissions).toFixed(2)}</TableCell>
+                            <TableCell>
+                              <Badge variant={cfg.variant} className="gap-1">
+                                <Icon className="w-3 h-3" />
+                                {t(cfg.labelKey)}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                          {sub.status === 'rejected' && sub.revision_notes && (
+                            <TableRow key={`${sub.id}-notes`}>
+                              <TableCell colSpan={7} className="bg-destructive/5 border-l-2 border-destructive/30">
+                                <div className="flex items-start gap-2 py-1">
+                                  <MessageSquare className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+                                  <div>
+                                    <p className="text-xs font-medium text-destructive">{t('history.revisionFeedback')}</p>
+                                    <p className="text-sm text-foreground mt-0.5">{sub.revision_notes}</p>
+                                  </div>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </>
                       );
                     })}
                   </TableBody>

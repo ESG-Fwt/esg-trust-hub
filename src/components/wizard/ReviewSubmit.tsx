@@ -16,6 +16,7 @@ const ReviewSubmit = () => {
   const {
     manualData,
     aiExtractedData,
+    uploadedFilePath,
     prevStep,
     isSubmitting,
     setIsSubmitting,
@@ -41,7 +42,7 @@ const ReviewSubmit = () => {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      await submissionsApi.submit(mergedData);
+      await submissionsApi.submit(mergedData, uploadedFilePath ?? undefined);
       setSubmissionComplete(true);
       toast.success(t('review.success'));
       navigate('/submission/success');

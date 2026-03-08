@@ -142,7 +142,7 @@ export const submissionsApi = {
   },
 
   getStats: async () => {
-    const { data: submissions } = await supabase.from('submissions').select('status, total_emissions');
+    const { data: submissions } = await supabase.from('submissions').select('status, total_emissions, user_id');
 
     const all = submissions ?? [];
     const pending = all.filter(s => s.status === 'pending').length;
@@ -154,7 +154,7 @@ export const submissionsApi = {
       pendingReviews: pending,
       complianceRate: total > 0 ? Math.round((approved / total) * 100) : 0,
       totalEmissions,
-      activeSuppliers: new Set(submissions?.map(s => (s as any).user_id)).size,
+      activeSuppliers: new Set(all.map(s => s.user_id)).size,
     };
   },
 

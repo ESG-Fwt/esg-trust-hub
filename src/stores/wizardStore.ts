@@ -14,6 +14,7 @@ interface WizardState {
   manualData: EnergyData;
   aiExtractedData: EnergyData | null;
   uploadedFileName: string | null;
+  uploadedFilePath: string | null;
   isAIProcessing: boolean;
   isSubmitting: boolean;
   submissionComplete: boolean;
@@ -26,6 +27,7 @@ interface WizardState {
   setManualData: (data: Partial<EnergyData>) => void;
   setAIExtractedData: (data: EnergyData) => void;
   setUploadedFileName: (name: string | null) => void;
+  setUploadedFilePath: (path: string | null) => void;
   setIsAIProcessing: (processing: boolean) => void;
   setIsSubmitting: (submitting: boolean) => void;
   setSubmissionComplete: (complete: boolean) => void;
@@ -47,6 +49,7 @@ export const useWizardStore = create<WizardState>()(
       manualData: initialEnergyData,
       aiExtractedData: null,
       uploadedFileName: null,
+      uploadedFilePath: null,
       isAIProcessing: false,
       isSubmitting: false,
       submissionComplete: false,
@@ -59,6 +62,7 @@ export const useWizardStore = create<WizardState>()(
         set((state) => ({ manualData: { ...state.manualData, ...data } })),
       setAIExtractedData: (data) => set({ aiExtractedData: data }),
       setUploadedFileName: (name) => set({ uploadedFileName: name }),
+      setUploadedFilePath: (path) => set({ uploadedFilePath: path }),
       setIsAIProcessing: (processing) => set({ isAIProcessing: processing }),
       setIsSubmitting: (submitting) => set({ isSubmitting: submitting }),
       setSubmissionComplete: (complete) => set({ submissionComplete: complete }),
@@ -69,6 +73,7 @@ export const useWizardStore = create<WizardState>()(
           manualData: initialEnergyData,
           aiExtractedData: null,
           uploadedFileName: null,
+          uploadedFilePath: null,
           isAIProcessing: false,
           isSubmitting: false,
           submissionComplete: false,

@@ -94,6 +94,7 @@ const translations: Record<Language, Record<string, string>> = {
     'history.statusPending': 'Pending',
     'history.statusApproved': 'Approved',
     'history.statusRejected': 'Rejected',
+    'history.revisionFeedback': 'Manager Feedback',
     // Supplier Profile
     'profile.title': 'Profile',
     'profile.subtitle': 'Manage your account details',
@@ -338,6 +339,7 @@ const translations: Record<Language, Record<string, string>> = {
     'history.statusPending': 'In Attesa',
     'history.statusApproved': 'Approvato',
     'history.statusRejected': 'Rifiutato',
+    'history.revisionFeedback': 'Feedback del Manager',
     // Supplier Profile
     'profile.title': 'Profilo',
     'profile.subtitle': 'Gestisci i dettagli del tuo account',
