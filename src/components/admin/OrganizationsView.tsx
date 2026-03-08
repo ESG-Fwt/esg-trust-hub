@@ -1,20 +1,20 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Building2, Plus, Edit2, Trash2, Users } from 'lucide-react';
+import { Building2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const OrganizationsView = () => {
   const queryClient = useQueryClient();
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
-  const [editingOrg, setEditingOrg] = useState<{ id: string; name: string } | null>(null);
   const [orgName, setOrgName] = useState('');
 
   const { data: orgs } = useQuery({
@@ -33,15 +33,15 @@ const OrganizationsView = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['organizations'] });
-      toast.success('Organization created');
+      toast.success(t('orgs.orgCreated'));
       setIsOpen(false);
       setOrgName('');
     },
-    onError: (e: any) => toast.error(e?.message ?? 'Failed to create organization'),
+    onError: (e: any) => toast.error(e?.message ?? 'Failed'),
   });
 
   const handleCreate = () => {
-    if (!orgName.trim()) { toast.error('Enter a name'); return; }
+    if (!orgName.trim()) { toast.error(t('orgs.enterName')); return; }
     createMutation.mutate(orgName.trim());
   };
 
@@ -49,11 +49,11 @@ const OrganizationsView = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Organizations</h1>
-          <p className="text-muted-foreground text-sm mt-1">Manage multi-tenant organizations</p>
+          <h1 className="text-2xl font-bold text-foreground">{t('orgs.title')}</h1>
+          <p className="text-muted-foreground text-sm mt-1">{t('orgs.subtitle')}</p>
         </div>
         <Button size="sm" onClick={() => { setOrgName(''); setIsOpen(true); }}>
-          <Plus className="w-4 h-4 mr-2" /> New Organization
+          <Plus className="w-4 h-4 mr-2" /> {t('orgs.newOrg')}
         </Button>
       </div>
 
@@ -69,7 +69,7 @@ const OrganizationsView = () => {
                     </div>
                     <div>
                       <p className="font-medium text-foreground">{org.name}</p>
-                      <p className="text-xs text-muted-foreground">Created {new Date(org.created_at).toLocaleDateString()}</p>
+                      <p className="text-xs text-muted-foreground">{t('orgs.created')} {new Date(org.created_at).toLocaleDateString()}</p>
                     </div>
                   </div>
                 </div>
@@ -81,7 +81,7 @@ const OrganizationsView = () => {
           <Card className="col-span-full">
             <CardContent className="py-12 text-center text-muted-foreground text-sm">
               <Building2 className="w-10 h-10 mx-auto mb-3 opacity-30" />
-              No organizations yet. Create one to get started.
+              {t('orgs.noOrgs')}
             </CardContent>
           </Card>
         )}
@@ -90,19 +90,19 @@ const OrganizationsView = () => {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>New Organization</DialogTitle>
-            <DialogDescription>Create a new organization for supplier grouping</DialogDescription>
+            <DialogTitle>{t('orgs.newOrg')}</DialogTitle>
+            <DialogDescription>{t('orgs.createForGrouping')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Organization Name</Label>
-              <Input placeholder="e.g. Acme Corporation" value={orgName} onChange={(e) => setOrgName(e.target.value)} />
+              <Label>{t('orgs.orgName')}</Label>
+              <Input placeholder={t('orgs.placeholder')} value={orgName} onChange={(e) => setOrgName(e.target.value)} />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setIsOpen(false)}>{t('common.cancel')}</Button>
             <Button onClick={handleCreate} disabled={createMutation.isPending}>
-              {createMutation.isPending ? 'Creating...' : 'Create'}
+              {createMutation.isPending ? t('common.creating') : t('common.create')}
             </Button>
           </DialogFooter>
         </DialogContent>

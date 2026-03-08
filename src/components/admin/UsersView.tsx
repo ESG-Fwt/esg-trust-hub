@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Users, Search, UserPlus, Shield, Building2 } from 'lucide-react';
+import { Users, Search, Shield, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface UserProfile {
   id: string;
@@ -25,6 +26,7 @@ interface UserProfile {
 
 const UsersView = () => {
   const queryClient = useQueryClient();
+  const { t } = useLanguage();
   const [search, setSearch] = useState('');
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [isAssigning, setIsAssigning] = useState(false);
@@ -65,10 +67,10 @@ const UsersView = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
-      toast.success('User updated');
+      toast.success(t('users.userUpdated'));
       setIsAssigning(false);
     },
-    onError: (e: any) => toast.error(e?.message ?? 'Failed to assign'),
+    onError: (e: any) => toast.error(e?.message ?? 'Failed'),
   });
 
   const filtered = users?.filter((u) =>
@@ -87,15 +89,15 @@ const UsersView = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Users</h1>
-          <p className="text-muted-foreground text-sm mt-1">Manage users and assign organizations</p>
+          <h1 className="text-2xl font-bold text-foreground">{t('users.title')}</h1>
+          <p className="text-muted-foreground text-sm mt-1">{t('users.subtitle')}</p>
         </div>
-        <Badge variant="secondary" className="text-xs font-normal">{users?.length ?? 0} users</Badge>
+        <Badge variant="secondary" className="text-xs font-normal">{users?.length ?? 0} {t('users.users')}</Badge>
       </div>
 
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input placeholder="Search users..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 h-9" />
+        <Input placeholder={t('users.searchUsers')} value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 h-9" />
       </div>
 
       <Card>
@@ -103,11 +105,11 @@ const UsersView = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-xs">Name</TableHead>
-                <TableHead className="text-xs">Role</TableHead>
-                <TableHead className="text-xs">Organization</TableHead>
-                <TableHead className="text-xs">Joined</TableHead>
-                <TableHead className="text-xs text-right">Actions</TableHead>
+                <TableHead className="text-xs">{t('users.name')}</TableHead>
+                <TableHead className="text-xs">{t('users.role')}</TableHead>
+                <TableHead className="text-xs">{t('users.organization')}</TableHead>
+                <TableHead className="text-xs">{t('users.joined')}</TableHead>
+                <TableHead className="text-xs text-right">{t('common.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -117,23 +119,23 @@ const UsersView = () => {
                   <TableCell>
                     <Badge variant={user.role === 'manager' ? 'default' : 'secondary'} className="text-[11px]">
                       {user.role === 'manager' ? <Shield className="w-3 h-3 mr-1" /> : <Users className="w-3 h-3 mr-1" />}
-                      {user.role}
+                      {user.role === 'manager' ? t('auth.manager') : t('auth.supplier')}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground">
-                    {user.organization_id ? orgMap[user.organization_id] ?? 'Unknown' : '—'}
+                    {user.organization_id ? orgMap[user.organization_id] ?? t('common.unknown') : '—'}
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground">{new Date(user.created_at).toLocaleDateString()}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="sm" onClick={() => handleAssignOrg(user)} className="h-7 text-xs">
-                      <Building2 className="w-3.5 h-3.5 mr-1" /> Assign Org
+                      <Building2 className="w-3.5 h-3.5 mr-1" /> {t('users.assignOrg')}
                     </Button>
                   </TableCell>
                 </motion.tr>
               ))}
               {(!filtered || filtered.length === 0) && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground py-12 text-sm">No users found</TableCell>
+                  <TableCell colSpan={5} className="text-center text-muted-foreground py-12 text-sm">{t('users.noUsers')}</TableCell>
                 </TableRow>
               )}
             </TableBody>
@@ -144,18 +146,18 @@ const UsersView = () => {
       <Dialog open={isAssigning} onOpenChange={setIsAssigning}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Assign Organization</DialogTitle>
-            <DialogDescription>Assign {selectedUser?.full_name} to an organization</DialogDescription>
+            <DialogTitle>{t('users.assignOrgTitle')}</DialogTitle>
+            <DialogDescription>{t('users.assignOrgDesc', { name: selectedUser?.full_name ?? '' })}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Organization</Label>
+              <Label>{t('users.organization')}</Label>
               <Select value={selectedOrgId} onValueChange={setSelectedOrgId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select organization" />
+                  <SelectValue placeholder={t('users.selectOrg')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">No Organization</SelectItem>
+                  <SelectItem value="none">{t('users.noOrg')}</SelectItem>
                   {orgs?.map((org) => (
                     <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
                   ))}
@@ -164,7 +166,7 @@ const UsersView = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAssigning(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setIsAssigning(false)}>{t('common.cancel')}</Button>
             <Button
               onClick={() => selectedUser && assignOrgMutation.mutate({
                 userId: selectedUser.user_id,
@@ -172,7 +174,7 @@ const UsersView = () => {
               })}
               disabled={assignOrgMutation.isPending}
             >
-              {assignOrgMutation.isPending ? 'Saving...' : 'Save'}
+              {assignOrgMutation.isPending ? t('common.saving') : t('common.save')}
             </Button>
           </DialogFooter>
         </DialogContent>

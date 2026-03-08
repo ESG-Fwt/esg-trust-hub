@@ -6,15 +6,17 @@ import MethodSelector from '@/components/wizard/MethodSelector';
 import EnergyDataForm from '@/components/wizard/EnergyDataForm';
 import SmartUpload from '@/components/wizard/SmartUpload';
 import ReviewSubmit from '@/components/wizard/ReviewSubmit';
-
-const steps = [
-  { title: 'Choose Method', description: 'Manual or AI' },
-  { title: 'Enter Data', description: 'Provide details' },
-  { title: 'Review', description: 'Submit data' },
-];
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const SupplierSubmit = () => {
   const { currentStep, submissionMethod } = useWizardStore();
+  const { t } = useLanguage();
+
+  const steps = [
+    { title: t('wizard.stepMethod'), description: t('wizard.stepMethodDesc') },
+    { title: t('wizard.stepData'), description: t('wizard.stepDataDesc') },
+    { title: t('wizard.stepReview'), description: t('wizard.stepReviewDesc') },
+  ];
 
   const renderStep = () => {
     switch (currentStep) {
@@ -33,8 +35,8 @@ const SupplierSubmit = () => {
     <SupplierLayout>
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-foreground">New Submission</h1>
-          <p className="text-sm text-muted-foreground mt-1">Submit your energy consumption data for ESG reporting</p>
+          <h1 className="text-2xl font-bold text-foreground">{t('submit.title')}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t('submit.subtitle')}</p>
         </div>
         <div className="mb-10">
           <Stepper currentStep={currentStep} steps={steps} />

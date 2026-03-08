@@ -18,29 +18,29 @@ import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
-
-const statusConfig = {
-  pending: { label: 'Pending Review', className: 'bg-status-pending-bg text-status-pending border-status-pending/30' },
-  approved: { label: 'Approved', className: 'bg-status-approved-bg text-status-approved border-status-approved/30' },
-  rejected: { label: 'Revision Requested', className: 'bg-status-rejected-bg text-status-rejected border-status-rejected/30' },
-} as const;
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const AdminReviewSubmission = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useLanguage();
   const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
   const [revisionModalOpen, setRevisionModalOpen] = useState(false);
   const [revisionNotes, setRevisionNotes] = useState('');
 
-  // Fetch this single submission by ID
+  const statusConfig = {
+    pending: { label: t('adminReview.pendingReview'), className: 'bg-status-pending-bg text-status-pending border-status-pending/30' },
+    approved: { label: t('adminReview.approved'), className: 'bg-status-approved-bg text-status-approved border-status-approved/30' },
+    rejected: { label: t('adminReview.revisionRequested'), className: 'bg-status-rejected-bg text-status-rejected border-status-rejected/30' },
+  } as const;
+
   const { data: submission, isLoading } = useQuery({
     queryKey: ['submission', id],
     queryFn: () => submissionsApi.getById(id!),
     enabled: !!id,
   });
 
-  // Resolve signed URL for file preview
   useEffect(() => {
     if (!submission?.file_url) {
       setFilePreviewUrl(null);
@@ -59,9 +59,9 @@ const AdminReviewSubmission = () => {
       queryClient.invalidateQueries({ queryKey: ['submission', id] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
       if (variables.status === 'approved') {
-        toast.success('Submission approved successfully.');
+        toast.success(t('adminReview.approvedSuccess'));
       } else {
-        toast.info('Revision requested — supplier will be notified.');
+        toast.info(t('adminReview.revisionSuccess'));
       }
       navigate('/admin/dashboard');
     },
@@ -73,19 +73,18 @@ const AdminReviewSubmission = () => {
 
   const handleRevisionSubmit = () => {
     if (!revisionNotes.trim()) {
-      toast.error('Please provide a reason for revision.');
+      toast.error(t('adminReview.provideReason'));
       return;
     }
     updateMutation.mutate({ status: 'rejected', notes: revisionNotes.trim() });
   };
 
-  // ── Loading / Not found states ──
   if (isLoading) {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center h-[60vh] gap-3 text-muted-foreground">
           <Loader2 className="w-5 h-5 animate-spin" />
-          <span className="text-sm">Loading submission…</span>
+          <span className="text-sm">{t('adminReview.loadingSubmission')}</span>
         </div>
       </AdminLayout>
     );
@@ -95,9 +94,9 @@ const AdminReviewSubmission = () => {
     return (
       <AdminLayout>
         <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-          <p className="text-muted-foreground">Submission not found</p>
+          <p className="text-muted-foreground">{t('adminReview.notFound')}</p>
           <Button variant="outline" onClick={() => navigate('/admin/submissions')}>
-            <ArrowLeft className="w-4 h-4 mr-2" /> Back to Submissions
+            <ArrowLeft className="w-4 h-4 mr-2" /> {t('adminReview.backToSubmissions')}
           </Button>
         </div>
       </AdminLayout>
@@ -107,32 +106,29 @@ const AdminReviewSubmission = () => {
   const status = statusConfig[submission.status as keyof typeof statusConfig] ?? statusConfig.pending;
 
   const vsmeData = [
-    { label: 'Electricity', value: Number(submission.electricity), unit: 'kWh', icon: Zap, iconColor: 'text-yellow-500', bgColor: 'bg-yellow-50' },
-    { label: 'Natural Gas', value: Number(submission.gas), unit: 'm³', icon: Flame, iconColor: 'text-orange-500', bgColor: 'bg-orange-50' },
-    { label: 'Fuel', value: Number(submission.fuel), unit: 'L', icon: Droplets, iconColor: 'text-blue-500', bgColor: 'bg-blue-50' },
-    { label: 'Waste', value: Number(submission.waste), unit: 'kg', icon: Trash2, iconColor: 'text-muted-foreground', bgColor: 'bg-muted' },
-    { label: 'Water', value: 0, unit: 'm³', icon: Droplet, iconColor: 'text-cyan-500', bgColor: 'bg-cyan-50' },
+    { label: t('energy.electricity'), value: Number(submission.electricity), unit: 'kWh', icon: Zap, iconColor: 'text-yellow-500', bgColor: 'bg-yellow-50' },
+    { label: t('energy.naturalGas'), value: Number(submission.gas), unit: 'm³', icon: Flame, iconColor: 'text-orange-500', bgColor: 'bg-orange-50' },
+    { label: t('energy.fuel'), value: Number(submission.fuel), unit: 'L', icon: Droplets, iconColor: 'text-blue-500', bgColor: 'bg-blue-50' },
+    { label: t('energy.waste'), value: Number(submission.waste), unit: 'kg', icon: Trash2, iconColor: 'text-muted-foreground', bgColor: 'bg-muted' },
+    { label: t('energy.water'), value: 0, unit: 'm³', icon: Droplet, iconColor: 'text-cyan-500', bgColor: 'bg-cyan-50' },
   ];
 
   return (
     <AdminLayout>
       <div className="flex flex-col h-[calc(100vh-2rem)] max-h-[calc(100vh-2rem)]">
-        {/* ── Top Header ── */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center gap-4 pb-5 border-b border-border shrink-0"
         >
           <Button variant="outline" size="sm" onClick={() => navigate('/admin/dashboard')} className="shrink-0">
-            <ArrowLeft className="w-4 h-4 mr-1.5" /> Back to Dashboard
+            <ArrowLeft className="w-4 h-4 mr-1.5" /> {t('adminReview.backToDashboard')}
           </Button>
-
           <Separator orientation="vertical" className="h-6" />
-
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3">
               <h1 className="text-xl font-bold text-foreground truncate">
-                {submission.supplier_name ?? 'Unknown Supplier'}
+                {submission.supplier_name ?? t('adminReview.unknownSupplier')}
               </h1>
               <Badge variant="outline" className={status.className}>{status.label}</Badge>
             </div>
@@ -140,21 +136,19 @@ const AdminReviewSubmission = () => {
               <span className="flex items-center gap-1"><Hash className="w-3 h-3" />{submission.id.slice(0, 8)}</span>
               <span className="flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
-                {new Date(submission.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                {new Date(submission.created_at).toLocaleDateString()}
               </span>
-              <span className="flex items-center gap-1"><User className="w-3 h-3" />{submission.supplier_name ?? 'Unknown'}</span>
+              <span className="flex items-center gap-1"><User className="w-3 h-3" />{submission.supplier_name ?? t('common.unknown')}</span>
             </div>
           </div>
         </motion.div>
 
-        {/* ── Main Content: 50/50 Split ── */}
         <div className="grid lg:grid-cols-2 gap-6 flex-1 min-h-0 pt-6 pb-24 overflow-y-auto">
-          {/* Left Column — VSME Data */}
           <div className="space-y-5">
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">
-                  VSME Extracted Data
+                  {t('adminReview.vsmeData')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
@@ -181,12 +175,11 @@ const AdminReviewSubmission = () => {
               </CardContent>
             </Card>
 
-            {/* Total Emissions */}
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
               <Card className="border-primary/20 bg-accent">
                 <CardContent className="pt-5 pb-5">
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">
-                    Total Calculated Emissions
+                    {t('adminReview.totalEmissions')}
                   </p>
                   <div className="flex items-baseline gap-2">
                     <span className="text-4xl font-bold font-mono text-primary">
@@ -194,19 +187,16 @@ const AdminReviewSubmission = () => {
                     </span>
                     <span className="text-sm font-medium text-muted-foreground">kg CO₂e</span>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Formula: Electricity × 0.5 + Gas × 2.0 + Fuel × 2.5 + Waste × 0.3
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-2">{t('adminReview.formula')}</p>
                 </CardContent>
               </Card>
             </motion.div>
 
-            {/* Revision Notes (if any) */}
             {submission.revision_notes && (
               <Card className="border-destructive/20">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-semibold text-destructive flex items-center gap-2">
-                    <RotateCcw className="w-4 h-4" /> Revision Notes
+                    <RotateCcw className="w-4 h-4" /> {t('adminReview.revisionNotes')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -215,21 +205,20 @@ const AdminReviewSubmission = () => {
               </Card>
             )}
 
-            {/* Audit Trail */}
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">
-                  Audit Trail
+                  {t('adminReview.auditTrail')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <div className="flex justify-between py-1">
-                  <span className="text-muted-foreground">Submitted</span>
+                  <span className="text-muted-foreground">{t('adminReview.submitted')}</span>
                   <span className="font-medium text-foreground">{new Date(submission.created_at).toLocaleString()}</span>
                 </div>
                 {submission.verified_at && (
                   <div className="flex justify-between py-1">
-                    <span className="text-muted-foreground">Verified</span>
+                    <span className="text-muted-foreground">{t('adminReview.verified')}</span>
                     <span className="font-medium text-foreground">{new Date(submission.verified_at).toLocaleString()}</span>
                   </div>
                 )}
@@ -237,7 +226,7 @@ const AdminReviewSubmission = () => {
                   <div className="p-3 bg-status-approved-bg rounded-lg border border-status-approved/20 mt-2">
                     <div className="flex items-center gap-2 mb-1">
                       <Shield className="w-3.5 h-3.5 text-status-approved" />
-                      <span className="text-xs font-semibold text-status-approved">Immutable Audit Hash</span>
+                      <span className="text-xs font-semibold text-status-approved">{t('adminReview.auditHash')}</span>
                     </div>
                     <code className="text-[10px] font-mono text-muted-foreground break-all leading-relaxed block">
                       {submission.audit_hash}
@@ -248,18 +237,17 @@ const AdminReviewSubmission = () => {
             </Card>
           </div>
 
-          {/* Right Column — Evidence / Document Viewer */}
           <div className="space-y-4">
             <Card className="flex flex-col h-full">
               <CardHeader className="pb-3 shrink-0">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">
-                    Supporting Evidence
+                    {t('adminReview.evidence')}
                   </CardTitle>
                   {filePreviewUrl && (
                     <a href={filePreviewUrl} target="_blank" rel="noopener noreferrer">
                       <Button variant="outline" size="sm" className="h-8 text-xs">
-                        <Download className="w-3.5 h-3.5 mr-1.5" /> Download Original
+                        <Download className="w-3.5 h-3.5 mr-1.5" /> {t('adminReview.downloadOriginal')}
                       </Button>
                     </a>
                   )}
@@ -269,11 +257,7 @@ const AdminReviewSubmission = () => {
                 <div className="w-full h-full min-h-[500px] bg-muted/50 rounded-lg border-2 border-dashed border-border overflow-hidden">
                   {filePreviewUrl ? (
                     submission.file_url?.endsWith('.pdf') ? (
-                      <object
-                        data={filePreviewUrl}
-                        type="application/pdf"
-                        className="w-full h-full min-h-[500px]"
-                      >
+                      <object data={filePreviewUrl} type="application/pdf" className="w-full h-full min-h-[500px]">
                         <iframe src={filePreviewUrl} className="w-full h-full min-h-[500px]" title="PDF Viewer" />
                       </object>
                     ) : (
@@ -285,8 +269,8 @@ const AdminReviewSubmission = () => {
                         <FileText className="w-8 h-8 opacity-40" />
                       </div>
                       <div className="text-center">
-                        <p className="text-sm font-medium">No document uploaded</p>
-                        <p className="text-xs mt-1">The supplier did not attach a file to this submission</p>
+                        <p className="text-sm font-medium">{t('adminReview.noDocument')}</p>
+                        <p className="text-xs mt-1">{t('adminReview.noDocumentHint')}</p>
                       </div>
                     </div>
                   )}
@@ -296,7 +280,6 @@ const AdminReviewSubmission = () => {
           </div>
         </div>
 
-        {/* ── Bottom Action Bar (sticky) ── */}
         {submission.status === 'pending' && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -305,7 +288,7 @@ const AdminReviewSubmission = () => {
             className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-sm"
           >
             <div className="max-w-screen-xl mx-auto px-6 py-4 flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">Review complete? Choose an action below.</p>
+              <p className="text-sm text-muted-foreground">{t('adminReview.reviewComplete')}</p>
               <div className="flex items-center gap-3">
                 <Button
                   variant="outline"
@@ -314,7 +297,7 @@ const AdminReviewSubmission = () => {
                   disabled={updateMutation.isPending}
                   className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
                 >
-                  <RotateCcw className="w-4 h-4 mr-2" /> Request Revision
+                  <RotateCcw className="w-4 h-4 mr-2" /> {t('adminReview.requestRevision')}
                 </Button>
                 <Button
                   size="default"
@@ -327,24 +310,21 @@ const AdminReviewSubmission = () => {
                   ) : (
                     <CheckCircle className="w-4 h-4 mr-2" />
                   )}
-                  Approve Submission
+                  {t('adminReview.approveSubmission')}
                 </Button>
               </div>
             </div>
           </motion.div>
         )}
 
-        {/* ── Revision Modal ── */}
         <Dialog open={revisionModalOpen} onOpenChange={setRevisionModalOpen}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Request Revision</DialogTitle>
-              <DialogDescription>
-                Provide a reason so the supplier knows what to correct before resubmitting.
-              </DialogDescription>
+              <DialogTitle>{t('adminReview.requestRevision')}</DialogTitle>
+              <DialogDescription>{t('adminReview.revisionReason')}</DialogDescription>
             </DialogHeader>
             <Textarea
-              placeholder="e.g. Electricity figures seem too low for a facility of this size. Please double-check your utility bill and resubmit."
+              placeholder={t('adminReview.revisionPlaceholder')}
               value={revisionNotes}
               onChange={(e) => setRevisionNotes(e.target.value)}
               rows={5}
@@ -352,7 +332,7 @@ const AdminReviewSubmission = () => {
             />
             <DialogFooter className="gap-2 sm:gap-0">
               <Button variant="outline" size="sm" onClick={() => setRevisionModalOpen(false)}>
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button
                 variant="destructive"
@@ -365,7 +345,7 @@ const AdminReviewSubmission = () => {
                 ) : (
                   <RotateCcw className="w-4 h-4 mr-2" />
                 )}
-                Submit Revision Request
+                {t('adminReview.submitRevision')}
               </Button>
             </DialogFooter>
           </DialogContent>

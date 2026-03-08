@@ -4,7 +4,8 @@ import { Clock, TrendingUp, Factory, Users, ArrowUpRight, ArrowDownRight, Chevro
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useQuery } from '@tanstack/react-query';
 import { submissionsApi } from '@/lib/submissions';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const CHART_COLORS = [
   'hsl(152, 60%, 40%)',
@@ -15,6 +16,7 @@ const CHART_COLORS = [
 
 const DashboardOverview = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const { data: stats } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: submissionsApi.getStats,
@@ -27,7 +29,6 @@ const DashboardOverview = () => {
     refetchInterval: 10000,
   });
 
-  // Build chart data from real submissions
   const emissionsByMonth = (() => {
     if (!submissions) return [];
     const months: Record<string, { electricity: number; gas: number; fuel: number; waste: number }> = {};
@@ -49,27 +50,26 @@ const DashboardOverview = () => {
       if (s.status in counts) counts[s.status as keyof typeof counts]++;
     });
     return [
-      { name: 'Pending', value: counts.pending, color: 'hsl(38, 92%, 50%)' },
-      { name: 'Approved', value: counts.approved, color: 'hsl(152, 60%, 40%)' },
-      { name: 'Rejected', value: counts.rejected, color: 'hsl(0, 72%, 51%)' },
+      { name: t('dashboard.pending'), value: counts.pending, color: 'hsl(38, 92%, 50%)' },
+      { name: t('dashboard.approved'), value: counts.approved, color: 'hsl(152, 60%, 40%)' },
+      { name: t('dashboard.rejected'), value: counts.rejected, color: 'hsl(0, 72%, 51%)' },
     ].filter((d) => d.value > 0);
   })();
 
   const statCards = [
-    { title: 'Pending Reviews', value: stats?.pendingReviews ?? 0, icon: Clock, color: 'text-status-pending', bgColor: 'bg-status-pending-bg', trend: null },
-    { title: 'Compliance Rate', value: `${stats?.complianceRate ?? 0}%`, icon: TrendingUp, color: 'text-primary', bgColor: 'bg-accent', trend: '+4.2%' },
-    { title: 'Total Emissions', value: `${((stats?.totalEmissions ?? 0) / 1000).toFixed(1)}t`, icon: Factory, color: 'text-slate-600', bgColor: 'bg-slate-100', trend: '-2.1%' },
-    { title: 'Active Suppliers', value: stats?.activeSuppliers ?? 0, icon: Users, color: 'text-primary', bgColor: 'bg-accent', trend: null },
+    { title: t('dashboard.pendingReviews'), value: stats?.pendingReviews ?? 0, icon: Clock, color: 'text-status-pending', bgColor: 'bg-status-pending-bg', trend: null },
+    { title: t('dashboard.complianceRate'), value: `${stats?.complianceRate ?? 0}%`, icon: TrendingUp, color: 'text-primary', bgColor: 'bg-accent', trend: '+4.2%' },
+    { title: t('dashboard.totalEmissions'), value: `${((stats?.totalEmissions ?? 0) / 1000).toFixed(1)}t`, icon: Factory, color: 'text-slate-600', bgColor: 'bg-slate-100', trend: '-2.1%' },
+    { title: t('dashboard.activeSuppliers'), value: stats?.activeSuppliers ?? 0, icon: Users, color: 'text-primary', bgColor: 'bg-accent', trend: null },
   ];
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground text-sm mt-1">Real-time ESG compliance overview</p>
+        <h1 className="text-2xl font-bold text-foreground">{t('dashboard.title')}</h1>
+        <p className="text-muted-foreground text-sm mt-1">{t('dashboard.subtitle')}</p>
       </div>
 
-      {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((stat, i) => (
           <motion.div key={stat.title} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
@@ -96,12 +96,10 @@ const DashboardOverview = () => {
         ))}
       </div>
 
-      {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Emissions Trend */}
         <Card className="lg:col-span-2">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Emissions by Source</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t('dashboard.emissionsBySource')}</CardTitle>
           </CardHeader>
           <CardContent>
             {emissionsByMonth.length > 0 ? (
@@ -121,20 +119,19 @@ const DashboardOverview = () => {
                   <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="hsl(215, 15%, 45%)" />
                   <YAxis tick={{ fontSize: 11 }} stroke="hsl(215, 15%, 45%)" />
                   <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid hsl(215, 20%, 91%)', fontSize: '12px' }} />
-                  <Area type="monotone" dataKey="electricity" stroke={CHART_COLORS[0]} fill="url(#colorElec)" strokeWidth={2} name="Electricity (kWh)" />
-                  <Area type="monotone" dataKey="gas" stroke={CHART_COLORS[1]} fill="url(#colorGas)" strokeWidth={2} name="Gas (m³)" />
+                  <Area type="monotone" dataKey="electricity" stroke={CHART_COLORS[0]} fill="url(#colorElec)" strokeWidth={2} name={`${t('energy.electricity')} (kWh)`} />
+                  <Area type="monotone" dataKey="gas" stroke={CHART_COLORS[1]} fill="url(#colorGas)" strokeWidth={2} name={`${t('energy.naturalGas')} (m³)`} />
                 </AreaChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-[260px] flex items-center justify-center text-muted-foreground text-sm">No data yet</div>
+              <div className="h-[260px] flex items-center justify-center text-muted-foreground text-sm">{t('common.noData')}</div>
             )}
           </CardContent>
         </Card>
 
-        {/* Status Distribution */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Status Distribution</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t('dashboard.statusDistribution')}</CardTitle>
           </CardHeader>
           <CardContent>
             {statusDistribution.length > 0 ? (
@@ -160,16 +157,15 @@ const DashboardOverview = () => {
                 </div>
               </div>
             ) : (
-              <div className="h-[220px] flex items-center justify-center text-muted-foreground text-sm">No data yet</div>
+              <div className="h-[220px] flex items-center justify-center text-muted-foreground text-sm">{t('common.noData')}</div>
             )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Recent Activity */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Recent Submissions</CardTitle>
+          <CardTitle className="text-sm font-medium text-muted-foreground">{t('dashboard.recentSubmissions')}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <div className="divide-y divide-border">
@@ -181,7 +177,7 @@ const DashboardOverview = () => {
                   s.status === 'approved' ? 'bg-status-approved' : s.status === 'rejected' ? 'bg-status-rejected' : 'bg-status-pending'
                 }`} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{s.supplier_name ?? 'Unknown'}</p>
+                  <p className="text-sm font-medium text-foreground truncate">{s.supplier_name ?? t('common.unknown')}</p>
                   <p className="text-xs text-muted-foreground">{new Date(s.created_at).toLocaleDateString()}</p>
                 </div>
                 <span className="text-sm font-mono text-foreground">{Number(s.total_emissions).toLocaleString()} kg</span>
@@ -189,7 +185,7 @@ const DashboardOverview = () => {
               </div>
             ))}
             {(!submissions || submissions.length === 0) && (
-              <div className="px-6 py-8 text-center text-muted-foreground text-sm">No submissions yet</div>
+              <div className="px-6 py-8 text-center text-muted-foreground text-sm">{t('dashboard.noSubmissions')}</div>
             )}
           </div>
         </CardContent>

@@ -7,20 +7,21 @@ import { Label } from '@/components/ui/label';
 import { useWizardStore } from '@/stores/wizardStore';
 import { toast } from 'sonner';
 import { validateEnergyData } from '@/lib/validationSchemas';
-
-const FIELD_CONFIG = {
-  electricity: { label: 'Electricity', unit: 'kWh', icon: Zap, color: 'text-amber-500', max: 1000000 },
-  gas: { label: 'Natural Gas', unit: 'm³', icon: Flame, color: 'text-orange-500', max: 100000 },
-  fuel: { label: 'Fuel', unit: 'L', icon: Droplets, color: 'text-blue-500', max: 50000 },
-  waste: { label: 'Waste', unit: 'kg', icon: Trash2, color: 'text-slate-500', max: 10000 },
-} as const;
-
-type FieldKey = keyof typeof FIELD_CONFIG;
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const EnergyDataForm = () => {
   const { manualData, setManualData, nextStep, prevStep } = useWizardStore();
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const { t } = useLanguage();
 
+  const FIELD_CONFIG = {
+    electricity: { labelKey: 'energy.electricity', unit: 'kWh', icon: Zap, color: 'text-amber-500', max: 1000000 },
+    gas: { labelKey: 'energy.naturalGas', unit: 'm³', icon: Flame, color: 'text-orange-500', max: 100000 },
+    fuel: { labelKey: 'energy.fuel', unit: 'L', icon: Droplets, color: 'text-blue-500', max: 50000 },
+    waste: { labelKey: 'energy.waste', unit: 'kg', icon: Trash2, color: 'text-slate-500', max: 10000 },
+  } as const;
+
+  type FieldKey = keyof typeof FIELD_CONFIG;
   const fields: FieldKey[] = ['electricity', 'gas', 'fuel', 'waste'];
 
   const validateForm = (): boolean => {
@@ -42,7 +43,7 @@ const EnergyDataForm = () => {
     if (validateForm()) {
       nextStep();
     } else {
-      toast.error('Please fix the errors before continuing');
+      toast.error(t('energy.fixErrors'));
     }
   };
 
@@ -65,10 +66,8 @@ const EnergyDataForm = () => {
       className="max-w-xl mx-auto space-y-8"
     >
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold text-foreground">Energy Consumption Data</h2>
-        <p className="text-muted-foreground">
-          Enter your monthly energy consumption values below
-        </p>
+        <h2 className="text-2xl font-bold text-foreground">{t('energy.title')}</h2>
+        <p className="text-muted-foreground">{t('energy.subtitle')}</p>
       </div>
 
       <div className="grid gap-6">
@@ -85,7 +84,7 @@ const EnergyDataForm = () => {
             >
               <Label htmlFor={key} className="text-sm font-medium flex items-center gap-2 mb-2">
                 <Icon className={`w-4 h-4 ${config.color}`} />
-                {config.label}
+                {t(config.labelKey)}
                 <span className="text-xs text-muted-foreground ml-auto">
                   (max: {config.max.toLocaleString()})
                 </span>
@@ -120,16 +119,16 @@ const EnergyDataForm = () => {
 
       <div className="flex gap-4 pt-4">
         <Button variant="outline" onClick={prevStep} className="flex-1 h-12">
-          <ArrowLeft className="w-5 h-5 mr-2" /> Back
+          <ArrowLeft className="w-5 h-5 mr-2" /> {t('common.back')}
         </Button>
         <Button onClick={handleNext} className="flex-1 h-12 text-base font-medium">
-          Continue to Review
+          {t('energy.continueReview')}
           <ArrowRight className="w-5 h-5 ml-2" />
         </Button>
       </div>
 
       <p className="text-center text-sm text-muted-foreground">
-        💡 Leave fields at 0 if not applicable
+        {t('energy.leaveZero')}
       </p>
     </motion.div>
   );

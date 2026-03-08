@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { FileText, TrendingUp, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Submission {
   id: string;
@@ -19,20 +20,21 @@ interface Submission {
   created_at: string;
 }
 
-const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ElementType }> = {
-  pending: { label: 'Pending', variant: 'outline', icon: Clock },
-  approved: { label: 'Approved', variant: 'default', icon: CheckCircle2 },
-  rejected: { label: 'Rejected', variant: 'destructive', icon: XCircle },
-};
-
 const SupplierHistory = () => {
   const { user } = useAuthStore();
+  const { t } = useLanguage();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const statusConfig: Record<string, { labelKey: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ElementType }> = {
+    pending: { labelKey: 'history.statusPending', variant: 'outline', icon: Clock },
+    approved: { labelKey: 'history.statusApproved', variant: 'default', icon: CheckCircle2 },
+    rejected: { labelKey: 'history.statusRejected', variant: 'destructive', icon: XCircle },
+  };
+
   useEffect(() => {
     if (!user) return;
-    const fetch = async () => {
+    const fetchData = async () => {
       const { data } = await supabase
         .from('submissions')
         .select('id, electricity, gas, fuel, waste, total_emissions, status, created_at')
@@ -41,22 +43,20 @@ const SupplierHistory = () => {
       setSubmissions(data ?? []);
       setLoading(false);
     };
-    fetch();
+    fetchData();
   }, [user]);
 
   const totalEmissions = submissions.reduce((s, sub) => s + Number(sub.total_emissions), 0);
-  const approvedCount = submissions.filter((s) => s.status === 'approved').length;
   const pendingCount = submissions.filter((s) => s.status === 'pending').length;
 
   return (
     <SupplierLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">My Submissions</h1>
-          <p className="text-sm text-muted-foreground mt-1">Track the status of all your energy data submissions</p>
+          <h1 className="text-2xl font-bold text-foreground">{t('history.title')}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t('history.subtitle')}</p>
         </div>
 
-        {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Card>
             <CardContent className="pt-6 flex items-center gap-4">
@@ -65,7 +65,7 @@ const SupplierHistory = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold text-foreground">{submissions.length}</p>
-                <p className="text-xs text-muted-foreground">Total Submissions</p>
+                <p className="text-xs text-muted-foreground">{t('history.totalSubmissions')}</p>
               </div>
             </CardContent>
           </Card>
@@ -76,7 +76,7 @@ const SupplierHistory = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold text-foreground">{totalEmissions.toFixed(1)}</p>
-                <p className="text-xs text-muted-foreground">Total CO₂e (tonnes)</p>
+                <p className="text-xs text-muted-foreground">{t('history.totalCO2e')}</p>
               </div>
             </CardContent>
           </Card>
@@ -87,16 +87,15 @@ const SupplierHistory = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold text-foreground">{pendingCount}</p>
-                <p className="text-xs text-muted-foreground">Awaiting Review</p>
+                <p className="text-xs text-muted-foreground">{t('history.awaitingReview')}</p>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Table */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Submission History</CardTitle>
+            <CardTitle className="text-base">{t('history.submissionHistory')}</CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -106,20 +105,20 @@ const SupplierHistory = () => {
             ) : submissions.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <FileText className="w-10 h-10 mx-auto mb-3 opacity-40" />
-                <p>No submissions yet. Start by creating a new submission.</p>
+                <p>{t('history.noSubmissions')}</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead className="text-right">Electricity</TableHead>
-                      <TableHead className="text-right">Gas</TableHead>
-                      <TableHead className="text-right">Fuel</TableHead>
-                      <TableHead className="text-right">Waste</TableHead>
+                      <TableHead>{t('common.date')}</TableHead>
+                      <TableHead className="text-right">{t('energy.electricity')}</TableHead>
+                      <TableHead className="text-right">{t('energy.naturalGas')}</TableHead>
+                      <TableHead className="text-right">{t('energy.fuel')}</TableHead>
+                      <TableHead className="text-right">{t('energy.waste')}</TableHead>
                       <TableHead className="text-right">Total CO₂e</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead>{t('common.status')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -137,7 +136,7 @@ const SupplierHistory = () => {
                           <TableCell>
                             <Badge variant={cfg.variant} className="gap-1">
                               <Icon className="w-3 h-3" />
-                              {cfg.label}
+                              {t(cfg.labelKey)}
                             </Badge>
                           </TableCell>
                         </TableRow>

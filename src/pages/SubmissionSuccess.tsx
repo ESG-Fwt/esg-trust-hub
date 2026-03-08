@@ -3,10 +3,12 @@ import { CheckCircle2, ArrowRight, FileCheck, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useWizardStore } from '@/stores/wizardStore';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const SubmissionSuccess = () => {
   const navigate = useNavigate();
   const { resetWizard } = useWizardStore();
+  const { t } = useLanguage();
 
   const handleNewSubmission = () => {
     resetWizard();
@@ -23,8 +25,8 @@ const SubmissionSuccess = () => {
         </motion.div>
 
         <div className="space-y-3">
-          <h1 className="text-3xl font-bold text-foreground">Submission Successful!</h1>
-          <p className="text-muted-foreground">Your energy data has been securely recorded and is now awaiting review by your ESG manager.</p>
+          <h1 className="text-3xl font-bold text-foreground">{t('success.title')}</h1>
+          <p className="text-muted-foreground">{t('success.subtitle')}</p>
         </div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="bg-accent/50 border border-border rounded-xl p-6 space-y-4">
@@ -33,25 +35,25 @@ const SubmissionSuccess = () => {
               <FileCheck className="w-5 h-5 text-status-pending" />
             </div>
             <div>
-              <p className="font-medium text-foreground">Status: Pending Review</p>
-              <p className="text-sm text-muted-foreground">You'll be notified once approved</p>
+              <p className="font-medium text-foreground">{t('success.statusPending')}</p>
+              <p className="text-sm text-muted-foreground">{t('success.notified')}</p>
             </div>
           </div>
           <div className="h-px bg-border" />
           <div className="text-left text-sm text-muted-foreground">
-            <p>🔒 Data encrypted & stored securely</p>
-            <p>📋 Audit trail created</p>
+            <p>{t('success.encrypted')}</p>
+            <p>{t('success.auditTrail')}</p>
           </div>
         </motion.div>
 
         <div className="flex flex-col gap-3">
           <Button onClick={handleNewSubmission} className="w-full h-12">
             <ArrowRight className="w-5 h-5 mr-2" />
-            New Submission
+            {t('success.newSubmission')}
           </Button>
           <Button variant="outline" onClick={() => navigate('/supplier/history')} className="w-full h-12">
             <Home className="w-5 h-5 mr-2" />
-            View My Submissions
+            {t('success.viewSubmissions')}
           </Button>
         </div>
       </motion.div>

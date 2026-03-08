@@ -10,9 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { submissionsApi, Submission } from '@/lib/submissions';
 import { useQuery } from '@tanstack/react-query';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const SubmissionsView = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
@@ -30,10 +32,10 @@ const SubmissionsView = () => {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'pending': return <Badge variant="outline" className="bg-status-pending-bg text-status-pending border-status-pending/30 text-[11px]">Pending</Badge>;
-      case 'approved': return <Badge variant="outline" className="bg-status-approved-bg text-status-approved border-status-approved/30 text-[11px]">Approved</Badge>;
-      case 'rejected': return <Badge variant="outline" className="bg-status-rejected-bg text-status-rejected border-status-rejected/30 text-[11px]">Rejected</Badge>;
-      default: return <Badge variant="outline" className="text-[11px]">Unknown</Badge>;
+      case 'pending': return <Badge variant="outline" className="bg-status-pending-bg text-status-pending border-status-pending/30 text-[11px]">{t('dashboard.pending')}</Badge>;
+      case 'approved': return <Badge variant="outline" className="bg-status-approved-bg text-status-approved border-status-approved/30 text-[11px]">{t('dashboard.approved')}</Badge>;
+      case 'rejected': return <Badge variant="outline" className="bg-status-rejected-bg text-status-rejected border-status-rejected/30 text-[11px]">{t('dashboard.rejected')}</Badge>;
+      default: return <Badge variant="outline" className="text-[11px]">{t('common.unknown')}</Badge>;
     }
   };
 
@@ -41,19 +43,18 @@ const SubmissionsView = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Submissions</h1>
-          <p className="text-muted-foreground text-sm mt-1">Review and manage supplier ESG submissions</p>
+          <h1 className="text-2xl font-bold text-foreground">{t('adminSub.title')}</h1>
+          <p className="text-muted-foreground text-sm mt-1">{t('adminSub.subtitle')}</p>
         </div>
         <Badge variant="secondary" className="font-normal text-xs">
-          {submissions?.length ?? 0} total
+          {submissions?.length ?? 0} {t('common.total')}
         </Badge>
       </div>
 
-      {/* Filters */}
       <div className="flex gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input placeholder="Search suppliers..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 h-9" />
+          <Input placeholder={t('adminSub.searchSuppliers')} value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 h-9" />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-[140px] h-9">
@@ -61,28 +62,27 @@ const SubmissionsView = () => {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="approved">Approved</SelectItem>
-            <SelectItem value="rejected">Rejected</SelectItem>
+            <SelectItem value="all">{t('adminSub.allStatus')}</SelectItem>
+            <SelectItem value="pending">{t('dashboard.pending')}</SelectItem>
+            <SelectItem value="approved">{t('dashboard.approved')}</SelectItem>
+            <SelectItem value="rejected">{t('dashboard.rejected')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      {/* Table */}
       <Card>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-xs">Date</TableHead>
-                <TableHead className="text-xs">Supplier</TableHead>
-                <TableHead className="text-xs text-right">Electricity</TableHead>
-                <TableHead className="text-xs text-right">Gas</TableHead>
-                <TableHead className="text-xs text-right">Fuel</TableHead>
+                <TableHead className="text-xs">{t('common.date')}</TableHead>
+                <TableHead className="text-xs">{t('auth.supplier')}</TableHead>
+                <TableHead className="text-xs text-right">{t('energy.electricity')}</TableHead>
+                <TableHead className="text-xs text-right">{t('energy.naturalGas')}</TableHead>
+                <TableHead className="text-xs text-right">{t('energy.fuel')}</TableHead>
                 <TableHead className="text-xs text-right">Total CO₂e</TableHead>
-                <TableHead className="text-xs">Status</TableHead>
-                <TableHead className="text-xs text-right">Actions</TableHead>
+                <TableHead className="text-xs">{t('common.status')}</TableHead>
+                <TableHead className="text-xs text-right">{t('common.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -92,7 +92,7 @@ const SubmissionsView = () => {
                   onClick={() => navigate(`/admin/review/${sub.id}`)}
                 >
                   <TableCell className="text-xs font-medium">{new Date(sub.created_at).toLocaleDateString()}</TableCell>
-                  <TableCell className="text-xs">{sub.supplier_name ?? 'Unknown'}</TableCell>
+                  <TableCell className="text-xs">{sub.supplier_name ?? t('common.unknown')}</TableCell>
                   <TableCell className="text-xs text-right font-mono">{Number(sub.electricity).toLocaleString()}</TableCell>
                   <TableCell className="text-xs text-right font-mono">{Number(sub.gas).toLocaleString()}</TableCell>
                   <TableCell className="text-xs text-right font-mono">{Number(sub.fuel).toLocaleString()}</TableCell>
@@ -100,7 +100,7 @@ const SubmissionsView = () => {
                   <TableCell>{getStatusBadge(sub.status)}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="sm" className="h-7 text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-                      Review <ChevronRight className="w-3.5 h-3.5 ml-1" />
+                      {t('adminSub.review')} <ChevronRight className="w-3.5 h-3.5 ml-1" />
                     </Button>
                   </TableCell>
                 </motion.tr>
@@ -108,7 +108,7 @@ const SubmissionsView = () => {
               {(!filtered || filtered.length === 0) && (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center text-muted-foreground py-12 text-sm">
-                    No submissions found
+                    {t('adminSub.noSubmissions')}
                   </TableCell>
                 </TableRow>
               )}
@@ -116,7 +116,6 @@ const SubmissionsView = () => {
           </Table>
         </CardContent>
       </Card>
-
     </div>
   );
 };
