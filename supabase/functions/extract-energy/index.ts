@@ -48,11 +48,20 @@ Strict Rules & Edge Cases:
 
 3. SUCCESS: If you can clearly read the energy consumption data, extract ALL available metrics:
    - electricity: in kWh (kilowatt-hours). Convert MWh to kWh (×1000).
-   - gas: in m³ (cubic meters of natural gas). Convert Smc to m³ if needed.
+   - gas: in m³ (cubic meters of natural gas). See ITALIAN GAS BILL RULES below.
    - fuel: in L (liters of fuel/diesel/petrol)
    - waste: in kg (kilograms of waste)
-    - water: in m³ (cubic meters of water consumed)
+   - water: in m³ (cubic meters of water consumed)
    Set any field to 0 if it is not present in the document.
+
+ITALIAN GAS BILL RULES (CRITICAL — follow these exactly for gas/natural gas bills):
+- The ONLY value you must extract for gas is the billed gas VOLUME for the specific billing period.
+- Look for labels such as: "Consumo Fatturato (Smc)", "Totale Smc", "Smc fatturati", "Metri cubi", "Consumo del periodo", "Consumo rilevato".
+- NEVER add Euro (€) monetary amounts, taxes, quotas, or cost line items together. Money is NOT consumption.
+- NEVER extract "Consumo Annuo", "Consumo Storico", or any annual/historical average. Only the consumption for the specific billing period shown on the invoice.
+- The volume is typically in Smc (Standard cubic meters). 1 Smc = 1 m³. Return the value as m³.
+- If the volume has decimals (e.g., "37,081125 Smc"), round DOWN to the nearest whole number (e.g., return 37).
+- If multiple volume figures appear, choose the one labeled as the billed/invoiced consumption for the period, NOT estimates or annual projections.
 
 Always use the extract_energy_data tool to return your result.`;
 
