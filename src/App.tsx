@@ -20,6 +20,9 @@ import AdminReviewSubmission from "./pages/AdminReviewSubmission";
 import AdminOrganizations from "./pages/AdminOrganizations";
 import AdminUsers from "./pages/AdminUsers";
 import AdminAuditTrail from "./pages/AdminAuditTrail";
+import AdminBenchmarking from "./pages/AdminBenchmarking";
+import AdminReports from "./pages/AdminReports";
+import AdminAlerts from "./pages/AdminAlerts";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -84,6 +87,15 @@ const AppRoutes = () => {
       } />
       <Route path="/admin/audit" element={
         <ProtectedRoute requiredRole="manager"><AdminAuditTrail /></ProtectedRoute>
+      } />
+      <Route path="/admin/benchmarking" element={
+        <ProtectedRoute requiredRole="manager"><AdminBenchmarking /></ProtectedRoute>
+      } />
+      <Route path="/admin/reports" element={
+        <ProtectedRoute requiredRole="manager"><AdminReports /></ProtectedRoute>
+      } />
+      <Route path="/admin/alerts" element={
+        <ProtectedRoute requiredRole="manager"><AdminAlerts /></ProtectedRoute>
       } />
 
       <Route path="*" element={<NotFound />} />
