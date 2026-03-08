@@ -24,6 +24,7 @@ const ReportsView = () => {
   const { t } = useLanguage();
   const { toast } = useToast();
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [isExportingAudit, setIsExportingAudit] = useState(false);
 
   const { data: submissions, isLoading } = useQuery({
     queryKey: ['submissions-reports'],
