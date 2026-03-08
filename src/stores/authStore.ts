@@ -49,6 +49,12 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       } else {
         set({ profile: null, role: null });
       }
+
+      // Reset wizard data on sign-in or sign-out so a new user never sees stale data
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+        const { useWizardStore } = await import('@/stores/wizardStore');
+        useWizardStore.getState().resetWizard();
+      }
     });
 
     const { data: { session } } = await supabase.auth.getSession();
