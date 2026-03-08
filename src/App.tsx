@@ -8,7 +8,9 @@ import { useAuthStore } from '@/stores/authStore';
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
-import SubmissionWizard from "./pages/SubmissionWizard";
+import SupplierSubmit from "./pages/supplier/SupplierSubmit";
+import SupplierHistory from "./pages/supplier/SupplierHistory";
+import SupplierProfile from "./pages/supplier/SupplierProfile";
 import SubmissionSuccess from "./pages/SubmissionSuccess";
 import ManagerDashboard from "./pages/ManagerDashboard";
 import AdminSubmissions from "./pages/AdminSubmissions";
@@ -28,44 +30,49 @@ const AppRoutes = () => {
 
   return (
     <Routes>
+      {/* Root redirect */}
       <Route path="/" element={
         isAuthenticated
-          ? <Navigate to={role === 'manager' ? '/admin/dashboard' : '/submission/new'} replace />
+          ? <Navigate to={role === 'manager' ? '/admin/dashboard' : '/supplier/submit'} replace />
           : <Navigate to="/login" replace />
       } />
+
+      {/* Auth */}
       <Route path="/login" element={<Login />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/submission/new" element={
-        <ProtectedRoute requiredRole="supplier">
-          <SubmissionWizard />
-        </ProtectedRoute>
+
+      {/* Supplier Portal */}
+      <Route path="/supplier/submit" element={
+        <ProtectedRoute requiredRole="supplier"><SupplierSubmit /></ProtectedRoute>
+      } />
+      <Route path="/supplier/history" element={
+        <ProtectedRoute requiredRole="supplier"><SupplierHistory /></ProtectedRoute>
+      } />
+      <Route path="/supplier/profile" element={
+        <ProtectedRoute requiredRole="supplier"><SupplierProfile /></ProtectedRoute>
       } />
       <Route path="/submission/success" element={
-        <ProtectedRoute requiredRole="supplier">
-          <SubmissionSuccess />
-        </ProtectedRoute>
+        <ProtectedRoute requiredRole="supplier"><SubmissionSuccess /></ProtectedRoute>
       } />
+
+      {/* Legacy supplier redirects */}
+      <Route path="/submission/new" element={<Navigate to="/supplier/submit" replace />} />
+
+      {/* Manager Portal */}
       <Route path="/admin/dashboard" element={
-        <ProtectedRoute requiredRole="manager">
-          <ManagerDashboard />
-        </ProtectedRoute>
+        <ProtectedRoute requiredRole="manager"><ManagerDashboard /></ProtectedRoute>
       } />
       <Route path="/admin/submissions" element={
-        <ProtectedRoute requiredRole="manager">
-          <AdminSubmissions />
-        </ProtectedRoute>
+        <ProtectedRoute requiredRole="manager"><AdminSubmissions /></ProtectedRoute>
       } />
       <Route path="/admin/organizations" element={
-        <ProtectedRoute requiredRole="manager">
-          <AdminOrganizations />
-        </ProtectedRoute>
+        <ProtectedRoute requiredRole="manager"><AdminOrganizations /></ProtectedRoute>
       } />
       <Route path="/admin/users" element={
-        <ProtectedRoute requiredRole="manager">
-          <AdminUsers />
-        </ProtectedRoute>
+        <ProtectedRoute requiredRole="manager"><AdminUsers /></ProtectedRoute>
       } />
+
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
