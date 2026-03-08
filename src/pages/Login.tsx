@@ -58,18 +58,35 @@ const Login = () => {
     }
   };
 
+
   const handleGoogleSignIn = async () => {
-    const { error } = await lovable.auth.signInWithOAuth('google', {
-      redirect_uri: window.location.origin,
-    });
-    if (error) toast.error('Google sign-in failed');
+    try {
+      const { error } = await lovable.auth.signInWithOAuth('google', {
+        redirect_uri: `${window.location.origin}/login`,
+      });
+      if (error) {
+        console.error('Google sign-in error:', error);
+        toast.error('Google sign-in failed');
+      }
+    } catch (err) {
+      console.error('Google OAuth error:', err);
+      toast.error('Google sign-in failed');
+    }
   };
 
   const handleAppleSignIn = async () => {
-    const { error } = await lovable.auth.signInWithOAuth('apple', {
-      redirect_uri: window.location.origin,
-    });
-    if (error) toast.error('Apple sign-in failed');
+    try {
+      const { error } = await lovable.auth.signInWithOAuth('apple', {
+        redirect_uri: `${window.location.origin}/login`,
+      });
+      if (error) {
+        console.error('Apple sign-in error:', error);
+        toast.error('Apple sign-in failed');
+      }
+    } catch (err) {
+      console.error('Apple OAuth error:', err);
+      toast.error('Apple sign-in failed');
+    }
   };
 
   const roleCards = [
