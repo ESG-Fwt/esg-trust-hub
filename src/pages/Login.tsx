@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuthStore, UserRole } from '@/stores/authStore';
-import { supabase } from '@/integrations/supabase/client';
+import { lovable } from '@/integrations/lovable/index';
 import { toast } from 'sonner';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { LanguageToggle } from '@/components/LanguageToggle';
@@ -62,25 +62,12 @@ const Login = () => {
 
   const handleGoogleSignIn = async () => {
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          skipBrowserRedirect: true,
-          redirectTo: `${window.location.origin}/login`,
-        },
+      const { error } = await lovable.auth.signInWithOAuth('google', {
+        redirect_uri: `${window.location.origin}/login`,
       });
-      if (error) { toast.error('Google sign-in failed'); return; }
-      if (data?.url) {
-        const popup = window.open(data.url, 'google-oauth', 'width=500,height=600');
-        if (!popup) { toast.error('Please allow popups for this site to sign in.'); return; }
-        const interval = setInterval(() => {
-          if (popup.closed) {
-            clearInterval(interval);
-            supabase.auth.getSession().then(({ data: { session } }) => {
-              if (session) window.location.reload();
-            });
-          }
-        }, 500);
+      if (error) {
+        console.error('Google sign-in error:', error);
+        toast.error('Google sign-in failed');
       }
     } catch (err) {
       console.error('Google OAuth error:', err);
@@ -90,25 +77,12 @@ const Login = () => {
 
   const handleAppleSignIn = async () => {
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'apple',
-        options: {
-          skipBrowserRedirect: true,
-          redirectTo: `${window.location.origin}/login`,
-        },
+      const { error } = await lovable.auth.signInWithOAuth('apple', {
+        redirect_uri: `${window.location.origin}/login`,
       });
-      if (error) { toast.error('Apple sign-in failed'); return; }
-      if (data?.url) {
-        const popup = window.open(data.url, 'apple-oauth', 'width=500,height=600');
-        if (!popup) { toast.error('Please allow popups for this site to sign in.'); return; }
-        const interval = setInterval(() => {
-          if (popup.closed) {
-            clearInterval(interval);
-            supabase.auth.getSession().then(({ data: { session } }) => {
-              if (session) window.location.reload();
-            });
-          }
-        }, 500);
+      if (error) {
+        console.error('Apple sign-in error:', error);
+        toast.error('Apple sign-in failed');
       }
     } catch (err) {
       console.error('Apple OAuth error:', err);
