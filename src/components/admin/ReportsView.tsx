@@ -5,10 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, FileDown, FileSpreadsheet, FileText, Shield, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Loader2, FileDown, FileSpreadsheet, FileText, Shield, CheckCircle2, AlertTriangle, Archive } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 
 const frameworkMappings = [
   { id: 'csrd', name: 'CSRD / ESRS E1', description: 'Climate Change – Scope 1 & 2 GHG emissions', fields: ['electricity', 'gas', 'fuel'] },
