@@ -18,6 +18,7 @@ interface Submission {
   total_emissions: number;
   status: string;
   created_at: string;
+  revision_notes: string | null;
 }
 
 const SupplierHistory = () => {
@@ -37,7 +38,7 @@ const SupplierHistory = () => {
     const fetchData = async () => {
       const { data } = await supabase
         .from('submissions')
-        .select('id, electricity, gas, fuel, waste, total_emissions, status, created_at')
+        .select('id, electricity, gas, fuel, waste, total_emissions, status, created_at, revision_notes')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       setSubmissions(data ?? []);
