@@ -28,11 +28,11 @@ export interface Submission {
 /** Fetch emission factors from the database, with hardcoded fallback. */
 const getEmissionFactors = async (): Promise<Record<string, number>> => {
   const defaults: Record<string, number> = {
-    electricity: 0.5,
-    gas: 2.0,
-    fuel: 2.5,
-    waste: 0.3,
-    water: 0.1,
+    electricity: 0.256,
+    gas: 1.93,
+    fuel: 2.51,
+    waste: 0.47,
+    water: 0.149,
   };
 
   try {
@@ -55,11 +55,11 @@ const getEmissionFactors = async (): Promise<Record<string, number>> => {
 /** Calculate total CO2e from energy data and factor map. */
 export const calculateEmissions = (data: EnergyData, factors: Record<string, number>): number => {
   return Math.round(
-    data.electricity * (factors.electricity ?? 0.5) +
-    data.gas * (factors.gas ?? 2.0) +
-    data.fuel * (factors.fuel ?? 2.5) +
-    data.waste * (factors.waste ?? 0.3) +
-    data.water * (factors.water ?? 0.1)
+    data.electricity * (factors.electricity ?? 0.256) +
+    data.gas * (factors.gas ?? 1.93) +
+    data.fuel * (factors.fuel ?? 2.51) +
+    data.waste * (factors.waste ?? 0.47) +
+    data.water * (factors.water ?? 0.149)
   );
 };
 

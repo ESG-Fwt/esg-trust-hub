@@ -103,7 +103,9 @@ export type Database = {
           created_at: string
           id: string
           label: string
+          reference_year: number
           source: string
+          source_reference: string
           unit: string
           updated_at: string
         }
@@ -112,7 +114,9 @@ export type Database = {
           created_at?: string
           id?: string
           label?: string
+          reference_year?: number
           source: string
+          source_reference?: string
           unit: string
           updated_at?: string
         }
@@ -121,7 +125,9 @@ export type Database = {
           created_at?: string
           id?: string
           label?: string
+          reference_year?: number
           source?: string
+          source_reference?: string
           unit?: string
           updated_at?: string
         }

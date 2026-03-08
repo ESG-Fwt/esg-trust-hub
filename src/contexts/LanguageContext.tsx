@@ -314,6 +314,10 @@ const translations: Record<Language, Record<string, string>> = {
     'reports.regulatoryFrameworks': 'Regulatory Framework Reports',
     'reports.metrics': 'metrics',
     'reports.exportReport': 'Export Report',
+    'reports.exportAuditTrail': 'Export CSRD Audit Trail',
+    'reports.auditExporting': 'Generating audit package…',
+    'reports.auditExported': 'CSRD Audit Trail ZIP downloaded',
+    'reports.auditNoApproved': 'No approved submissions to export',
     // Alerts
     'alerts.title': 'Deadline Alerts',
     'alerts.subtitle': 'Track submission deadlines and compliance alerts',
@@ -644,6 +648,10 @@ const translations: Record<Language, Record<string, string>> = {
     'reports.regulatoryFrameworks': 'Report Quadri Normativi',
     'reports.metrics': 'metriche',
     'reports.exportReport': 'Esporta Report',
+    'reports.exportAuditTrail': 'Esporta Audit Trail CSRD',
+    'reports.auditExporting': 'Generazione pacchetto audit…',
+    'reports.auditExported': 'ZIP Audit Trail CSRD scaricato',
+    'reports.auditNoApproved': 'Nessun invio approvato da esportare',
     // Alerts
     'alerts.title': 'Avvisi Scadenze',
     'alerts.subtitle': 'Monitora le scadenze degli invii e gli avvisi di conformità',
