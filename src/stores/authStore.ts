@@ -92,11 +92,6 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     });
     if (error) throw error;
   },
-          supabase.from('user_roles').update({ role: 'manager' }).eq('user_id', data.user.id),
-        ] : []),
-      ]);
-    }
-  },
 
   logout: async () => {
     await supabase.auth.signOut();
