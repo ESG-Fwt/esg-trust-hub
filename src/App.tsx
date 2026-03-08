@@ -70,6 +70,9 @@ const AppRoutes = () => {
       <Route path="/admin/review/:id" element={
         <ProtectedRoute requiredRole="manager"><AdminReviewSubmission /></ProtectedRoute>
       } />
+      <Route path="/manager/review/:id" element={
+        <ProtectedRoute requiredRole="manager"><AdminReviewSubmission /></ProtectedRoute>
+      } />
       <Route path="/admin/organizations" element={
         <ProtectedRoute requiredRole="manager"><AdminOrganizations /></ProtectedRoute>
       } />
