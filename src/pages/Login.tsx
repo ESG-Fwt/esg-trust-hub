@@ -62,8 +62,11 @@ const Login = () => {
 
   const handleGoogleSignIn = async () => {
     try {
-      const { error } = await lovable.auth.signInWithOAuth('google', {
-        redirect_uri: `${window.location.origin}/login`,
+      const { error } = await lovable.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/login`,
+        },
       });
       if (error) {
         console.error('Google sign-in error:', error);
@@ -77,8 +80,11 @@ const Login = () => {
 
   const handleAppleSignIn = async () => {
     try {
-      const { error } = await lovable.auth.signInWithOAuth('apple', {
-        redirect_uri: `${window.location.origin}/login`,
+      const { error } = await lovable.auth.signInWithOAuth({
+        provider: 'apple',
+        options: {
+          redirectTo: `${window.location.origin}/login`,
+        },
       });
       if (error) {
         console.error('Apple sign-in error:', error);
