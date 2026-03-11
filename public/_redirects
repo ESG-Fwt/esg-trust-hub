@@ -1,5 +1,2 @@
-/*  Netlify SPA redirect rules */
+# Netlify SPA redirect rules
 /*    /index.html   200
-
-# Lovable OAuth
-/.netlify/functions/lovable-auth-background /~oauth/:splat 200
